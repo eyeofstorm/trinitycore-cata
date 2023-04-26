@@ -63,22 +63,29 @@ char* command_finder(char const* text, int state)
     return ((char*)nullptr);
 }
 
+
 char** cli_completion(char const* text, int start, int /*end*/)
 {
     char** matches = nullptr;
 
     if (start)
-        rl_bind_key('\t', rl_abort);
+    {
+        //rl_bind_key('\t', _rl_abort);
+    }
     else
+    {
         matches = rl_completion_matches((char*)text, &command_finder);
+    }
+
     return matches;
 }
 
 int cli_hook_func()
 {
-       if (World::IsStopped())
-           rl_done = 1;
-       return 0;
+    // if (World::IsStopped())
+    //     rl_done = 1;
+
+    return 0;
 }
 
 #endif
@@ -128,7 +135,7 @@ void CliThread()
 {
     ///- Display the list of available CLI functions then beep
     //TC_LOG_INFO("server.worldserver", "");
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS && TRINITY_PLATFORM != TRINITY_PLATFORM_APPLE
     rl_attempted_completion_function = cli_completion;
     rl_event_hook = cli_hook_func;
 #endif

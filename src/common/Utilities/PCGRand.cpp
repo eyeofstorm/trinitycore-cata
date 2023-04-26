@@ -20,7 +20,11 @@
 #include <array>
 #include <functional>
 #include <random>
+#if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #include <emmintrin.h>
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#include "sse2neon.h"
+#endif
 #include <ctime>
 
 PCGRand::PCGRand()

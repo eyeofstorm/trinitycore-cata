@@ -41,7 +41,6 @@
 #define ERROR_PATH_NOT_FOUND ERROR_FILE_NOT_FOUND
 #endif
 
-#include "StormLib.h"
 #include "dbcfile.h"
 #include "Banner.h"
 #include "adt.h"

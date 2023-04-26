@@ -31,7 +31,7 @@ int rsa_make_key(prng_state *prng, int wprng, int size, long e, rsa_key *key)
    void *p, *q, *tmp1, *tmp2, *tmp3;
    int    err;
 
-   LTC_ARGCHK(ltc_mp.name != NULL);
+   LTC_ARGCHK(ltm_desc.name != NULL);
    LTC_ARGCHK(key         != NULL);
 
    if ((size < (MIN_RSA_SIZE/8)) || (size > (MAX_RSA_SIZE/8))) {

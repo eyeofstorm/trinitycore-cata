@@ -8,6 +8,10 @@
 #ifndef ZMQPP_INET_HPP_
 #define ZMQPP_INET_HPP_
 
+#include <utility>
+#include <cassert>
+#include <cstdint>
+
 /** \todo cross-platform version of including headers. */
 // We get htons and htonl from here
 #ifdef _WIN32
@@ -76,10 +80,12 @@ inline uint64_t swap_if_needed(uint64_t const value_to_check)
  * \param hostlonglong unsigned 64 bit host order integer
  * \return unsigned 64 bit network order integer
  */
+#ifndef htonll
 inline uint64_t htonll(uint64_t const hostlonglong)
 {
 	return zmqpp::swap_if_needed(hostlonglong);
 }
+#endif
 
 /*!
  * 64 bit version of the ntohs/ntohl
@@ -89,10 +95,12 @@ inline uint64_t htonll(uint64_t const hostlonglong)
  * \param networklonglong unsigned 64 bit network order integer
  * \return unsigned 64 bit host order integer
  */
+#ifndef ntohll
 inline uint64_t ntohll(uint64_t const networklonglong)
 {
 	return zmqpp::swap_if_needed(networklonglong);
 }
+#endif
 
 /*!
  * floating point version of the htons/htonl
@@ -142,7 +150,7 @@ inline double htond(double value)
 
 	uint64_t temp;
 	memcpy(&temp, &value, sizeof(uint64_t));
-	temp = zmqpp::htonll(temp);
+	temp = htonll(temp);
 	memcpy(&value, &temp, sizeof(uint64_t));
 
 	return value;
@@ -160,7 +168,7 @@ inline double ntohd(double value)
 
 	uint64_t temp;
 	memcpy(&temp, &value, sizeof(uint64_t));
-	temp = zmqpp::ntohll(temp);
+	temp = ntohll(temp);
 	memcpy(&value, &temp, sizeof(uint64_t));
 
 	return value;

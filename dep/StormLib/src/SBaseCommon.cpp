@@ -81,7 +81,7 @@ void InitializeMpqCryptography()
         register_hash(&sha1_desc);
 
         // Use LibTomMath as support math library for LibTomCrypt
-        ltc_mp = ltm_desc;    
+        //ltc_mp = ltm_desc;    
 
         // Don't do that again
         bMpqCryptographyInitialized = true;
