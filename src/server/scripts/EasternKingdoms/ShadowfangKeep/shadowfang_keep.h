@@ -19,9 +19,11 @@
 #define DEF_SHADOWFANG_H
 
 #include "CreatureAIImpl.h"
-#include "SpellScript.h"
+#include "Creature.h"
 
-#define DataHeader "SK"
+namespace ShadowfangKeep
+{
+constexpr char const* DataHeader = "SK";
 #define SKScriptName "instance_shadowfang_keep"
 
 uint32 const EncounterCount = 7;
@@ -110,5 +112,6 @@ AI* GetShadowfangKeepAI(Creature* creature)
 }
 
 #define RegisterShadowfangKeepCreatureAI(ai_name) RegisterCreatureAIWithFactory(ai_name, GetShadowfangKeepAI)
+}
 
 #endif

@@ -33,6 +33,8 @@
 #include "TemporarySummon.h"
 #include "ulduar.h"
 
+namespace Ulduar::AlgalonTheObserver
+{
 enum Texts
 {
     SAY_BRANN_ALGALON_INTRO_1       = 0,
@@ -787,7 +789,7 @@ class npc_living_constellation : public CreatureScript
 
                 me->DespawnOrUnsummon(1);
                 if (InstanceScript* instance = me->GetInstanceScript())
-                    instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, EVENT_ID_SUPERMASSIVE_START);
+                    instance->TriggerGameEvent(EVENT_ID_SUPERMASSIVE_START);
                 caster->CastSpell((Unit*)nullptr, SPELL_BLACK_HOLE_CREDIT, TRIGGERED_FULL_MASK);
                 caster->ToCreature()->DespawnOrUnsummon(1);
             }
@@ -1189,7 +1191,7 @@ class spell_algalon_collapse : public SpellScriptLoader
             void HandlePeriodic(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
-                Unit::DealDamage(GetTarget(), GetTarget(), GetTarget()->CountPctFromMaxHealth(1), nullptr, NODAMAGE);
+                Unit::DealDamage(GetTarget(), GetTarget(), GetTarget()->CountPctFromMaxHealth(1), 0, NODAMAGE);
             }
 
             void Register() override
@@ -1328,36 +1330,12 @@ class spell_algalon_cosmic_smash_damage : public SpellScriptLoader
             return new spell_algalon_cosmic_smash_damage_SpellScript();
         }
 };
-
-class spell_algalon_supermassive_fail : public SpellScriptLoader
-{
-    public:
-        spell_algalon_supermassive_fail() : SpellScriptLoader("spell_algalon_supermassive_fail") { }
-
-        class spell_algalon_supermassive_fail_SpellScript : public SpellScript
-        {
-            void RecalculateDamage()
-            {
-                if (!GetHitPlayer())
-                    return;
-
-                GetHitPlayer()->ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT, GetSpellInfo()->Id, true);
-            }
-
-            void Register() override
-            {
-                OnHit.Register(&spell_algalon_supermassive_fail_SpellScript::RecalculateDamage);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_algalon_supermassive_fail_SpellScript();
-        }
-};
+}
 
 void AddSC_boss_algalon_the_observer()
 {
+    using namespace Ulduar;
+    using namespace Ulduar::AlgalonTheObserver;
     new boss_algalon_the_observer();
     new npc_living_constellation();
     new npc_collapsing_star();
@@ -1371,5 +1349,4 @@ void AddSC_boss_algalon_the_observer()
     new spell_algalon_remove_phase();
     new spell_algalon_cosmic_smash();
     new spell_algalon_cosmic_smash_damage();
-    new spell_algalon_supermassive_fail();
 }

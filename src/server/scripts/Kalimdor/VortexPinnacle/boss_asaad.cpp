@@ -24,12 +24,13 @@
 #include "PassiveAI.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
-#include "Spell.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include "vortex_pinnacle.h"
 
+namespace VortexPinnacle::Asaad
+{
 enum Spells
 {
     // Asaad
@@ -96,6 +97,11 @@ enum Data
     DATA_STORM_TARGET_1         = 0,
     DATA_STORM_TARGET_2         = 1,
     DATA_STORM_TARGET_3         = 2
+};
+
+enum Misc
+{
+    GAME_EVENT_ENABLE_ACHIEVEMENT = 26429
 };
 
 float const TRIANGLE_Z      = 646.7143f;
@@ -186,6 +192,7 @@ struct boss_asaad : public BossAI
             events.ScheduleEvent(EVENT_STATIC_CLING, 10s);
         events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14s);
         events.ScheduleEvent(EVENT_SUPREMACY_OF_THE_STORM, 18s);
+        instance->TriggerGameEvent(GAME_EVENT_ENABLE_ACHIEVEMENT);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -730,9 +737,12 @@ class spell_asaad_supremacy_of_the_storm_damage: public SpellScript
         OnObjectAreaTargetSelect.Register(&spell_asaad_supremacy_of_the_storm_damage::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
     }
 };
+}
 
 void AddSC_boss_asaad()
 {
+    using namespace VortexPinnacle;
+    using namespace VortexPinnacle::Asaad;
     RegisterVortexPinnacleCreatureAI(boss_asaad);
     RegisterVortexPinnacleCreatureAI(npc_asaad_unstable_grounding_field);
     RegisterSpellScript(spell_asaad_sots_targeting);

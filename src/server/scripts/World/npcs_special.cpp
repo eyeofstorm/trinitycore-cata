@@ -31,13 +31,15 @@
 #include "PetAI.h"
 #include "ScriptedEscortAI.h"
 #include "ScriptedGossip.h"
-#include "ScriptMgr.h"
 #include "SmartAI.h"
 #include "SpellAuras.h"
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "Vehicle.h"
 #include "World.h"
+
+namespace NpcSpecial
+{
 
 /*########
 # npc_air_force_bots
@@ -2573,7 +2575,7 @@ class npc_train_wrecker : public CreatureScript
                             {
                                 me->SetFacingTo(target->GetOrientation());
                                 me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-                                _timer = 1.5 * IN_MILLISECONDS;
+                                _timer = 1.5 * AsUnderlyingType(IN_MILLISECONDS);
                                 _nextAction = EVENT_DO_WRECK;
                             }
                             else
@@ -2894,8 +2896,8 @@ public:
             init.SetFacing(o);
             who->GetMotionMaster()->LaunchMoveSpline(std::move(init), EVENT_VEHICLE_BOARD, MOTION_SLOT_CONTROLLED);
             who->m_Events.AddEvent(new CastFoodSpell(who, _chairSpells.at(who->GetEntry())), who->m_Events.CalculateTime(1000));
-            if (who->GetTypeId() == TYPEID_UNIT)
-                who->SetDisplayId(who->ToCreature()->GetCreatureTemplate()->Modelid1);
+            if (Creature* creature = who->ToCreature())
+                creature->SetDisplayFromModel(0);
         }
     };
 
@@ -3143,9 +3145,11 @@ private:
     EventMap _events;
     bool _hit;
 };
+}
 
 void AddSC_npcs_special()
 {
+    using namespace NpcSpecial;
     new npc_air_force_bots();
     new npc_chicken_cluck();
     new npc_dancing_flames();

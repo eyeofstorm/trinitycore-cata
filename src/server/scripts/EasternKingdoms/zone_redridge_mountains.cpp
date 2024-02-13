@@ -27,6 +27,8 @@ Script Data End */
 #include "Player.h"
 #include "ScriptedCreature.h"
 
+namespace RedridgeMountains
+{
 enum DumpyKeeshan
 {
     NPC_BIGEARL                    = 43248,
@@ -324,7 +326,6 @@ public:
         {
             _events.Reset();
             _events.ScheduleEvent(EVENT_DETERMINE_EVENT, Seconds(2));
-            me->SetDisplayId(me->GetCreatureTemplate()->GetRandomValidModelId());
         }
 
         void UpdateAI(uint32 diff) override
@@ -378,9 +379,11 @@ public:
         return new npc_redridge_citizenAI(creature);
     }
 };
+}
 
 void AddSC_redridge_mountains()
 {
+    using namespace RedridgeMountains;
     new npc_big_earl();
     new npc_dumpy_and_keeshan();
     new npc_bridge_worker_alex();

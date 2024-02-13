@@ -264,11 +264,8 @@ void Battlefield::InvitePlayerToWar(Player* player)
     if (player->IsInFlight())
         return;
 
-    if (player->InArena() || player->GetBattleground())
-    {
-        m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+    if (player->GetBattleground())
         return;
-    }
 
     // If the player does not match minimal level requirements for the battlefield, kick him
     if (player->getLevel() < m_MinLevel)
@@ -982,7 +979,7 @@ bool BfCapturePoint::Update(uint32 diff)
     }
 
     // get the difference of numbers
-    float fact_diff = ((float) m_activePlayers[TEAM_ALLIANCE].size() - (float) m_activePlayers[TEAM_HORDE].size()) * diff / BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL;
+    float fact_diff = ((float) m_activePlayers[TEAM_ALLIANCE].size() - (float) m_activePlayers[TEAM_HORDE].size()) * diff / float(BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL);
     if (G3D::fuzzyEq(fact_diff, 0.0f))
         return false;
 

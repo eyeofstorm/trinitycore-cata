@@ -27,6 +27,8 @@
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 
+namespace AzjolNerub::Anubarak
+{
 enum Spells
 {
     SPELL_EMERGE                = 53500,
@@ -122,7 +124,6 @@ public:
         {
             BossAI::Reset();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-            instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_GOTTA_GO_START_EVENT);
             _nextSubmerge = 75;
             _petCount = 0;
         }
@@ -139,7 +140,7 @@ public:
                 door2->SetGoState(GO_STATE_ACTIVE);
 
             Talk(SAY_AGGRO);
-            instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_GOTTA_GO_START_EVENT);
+            instance->TriggerGameEvent(ACHIEV_GOTTA_GO_START_EVENT);
 
             events.SetPhase(PHASE_EMERGE);
             events.ScheduleEvent(EVENT_CLOSE_DOOR, Seconds(5));
@@ -698,9 +699,12 @@ class spell_anubarak_carrion_beetles : public SpellScriptLoader
             return new spell_anubarak_carrion_beetles_AuraScript();
         }
 };
+}
 
 void AddSC_boss_anub_arak()
 {
+    using namespace AzjolNerub;
+    using namespace AzjolNerub::Anubarak;
     new boss_anub_arak();
 
     new npc_anubarak_anub_ar_darter();

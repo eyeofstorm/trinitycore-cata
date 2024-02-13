@@ -16,6 +16,7 @@
 */
 
 #include "shadowfang_keep.h"
+#include "SpellScript.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -26,6 +27,8 @@
 #include "InstanceScript.h"
 #include "MotionMaster.h"
 
+namespace ShadowfangKeep::LordWalden
+{
 enum Texts
 {
     SAY_AGGRO   = 0,
@@ -303,9 +306,12 @@ class spell_walden_toxic_catalyst : public SpellScript
         OnObjectAreaTargetSelect.Register(&spell_walden_toxic_catalyst::FilterTargets, EFFECT_ALL, TARGET_UNIT_SRC_AREA_ENEMY);
     }
 };
+}
 
 void AddSC_boss_lord_walden()
 {
+    using namespace ShadowfangKeep;
+    using namespace ShadowfangKeep::LordWalden;
     RegisterShadowfangKeepCreatureAI(boss_lord_walden);
     RegisterSpellScript(spell_walden_toxic_coagulent);
     RegisterSpellScript(spell_walden_conjure_poisonous_mixture);

@@ -20,6 +20,8 @@
 #include "naxxramas.h"
 #include "ScriptedCreature.h"
 
+namespace Naxxramas::Patchwerk
+{
 enum Spells
 {
     SPELL_HATEFUL_STRIKE                        = 28308,
@@ -72,8 +74,6 @@ public:
         void Reset() override
         {
             _Reset();
-
-            instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_MAKE_QUICK_WERK_OF_HIM_STARTING_EVENT);
         }
 
         void KilledUnit(Unit* /*Victim*/) override
@@ -96,7 +96,7 @@ public:
             events.ScheduleEvent(EVENT_HATEFUL, Seconds(1));
             events.ScheduleEvent(EVENT_BERSERK, Minutes(6));
 
-            instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_MAKE_QUICK_WERK_OF_HIM_STARTING_EVENT);
+            instance->TriggerGameEvent(ACHIEV_MAKE_QUICK_WERK_OF_HIM_STARTING_EVENT);
         }
 
         void UpdateAI(uint32 diff) override
@@ -185,8 +185,11 @@ public:
         return GetNaxxramasAI<boss_patchwerkAI>(creature);
     }
 };
+}
 
 void AddSC_boss_patchwerk()
 {
+    using namespace Naxxramas;
+    using namespace Naxxramas::Patchwerk;
     new boss_patchwerk();
 }

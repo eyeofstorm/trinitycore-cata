@@ -592,7 +592,7 @@ public:
             // before GM
             float x, y, z;
             _player->GetPosition(x, y, z);
-            target->TeleportTo(_player->GetMapId(), x, y, z, target->GetOrientation(), 0, map->GetInstanceId());
+            target->TeleportTo(_player->GetMapId(), x, y, z, target->GetOrientation(), TELE_TO_NONE, map->GetInstanceId());
             PhasingHandler::InheritPhaseShift(target, handler->GetSession()->GetPlayer());
             target->UpdateObjectVisibility();
         }
@@ -646,7 +646,7 @@ public:
             if (sWorld->getBoolConfig(CONFIG_DIE_COMMAND_MODE))
                 Unit::Kill(handler->GetSession()->GetPlayer(), target);
             else
-                Unit::DealDamage(handler->GetSession()->GetPlayer(), target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                Unit::DealDamage(handler->GetSession()->GetPlayer(), target, target->GetHealth(), 0, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
 
         return true;
@@ -1065,7 +1065,7 @@ public:
         uint32 zoneId = player->GetZoneId();
 
         AreaTableEntry const* areaEntry = sAreaTableStore.LookupEntry(zoneId);
-        if (!areaEntry || areaEntry->ParentAreaID != 0)
+        if (!areaEntry || areaEntry->GetFlags().HasFlag(AreaFlags::IsSubzone))
         {
             handler->PSendSysMessage(LANG_COMMAND_GRAVEYARDWRONGZONE, graveyardId, zoneId);
             handler->SetSentErrorMessage(true);
@@ -1830,11 +1830,17 @@ public:
         AreaTableEntry const* area = sAreaTableStore.LookupEntry(areaId);
         if (area)
         {
-            areaName = area->AreaName;
+            zoneName = area->AreaName[locale];
 
-            AreaTableEntry const* zone = sAreaTableStore.LookupEntry(area->ParentAreaID);
-            if (zone)
-                zoneName = zone->AreaName;
+            if (area->GetFlags().HasFlag(AreaFlags::IsSubzone))
+            {
+                AreaTableEntry const* zone = sAreaTableStore.LookupEntry(area->ParentAreaID);
+                if (zone)
+                {
+                    areaName = zoneName;
+                    zoneName = zone->AreaName[locale];
+                }
+            }
         }
 
         if (target)
@@ -2307,7 +2313,7 @@ public:
         // flat melee damage without resistence/etc reduction
         if (!schoolStr)
         {
-            Unit::DealDamage(handler->GetSession()->GetPlayer(), target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            Unit::DealDamage(handler->GetSession()->GetPlayer(), target, damage, 0, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             if (target != handler->GetSession()->GetPlayer())
                 handler->GetSession()->GetPlayer()->SendAttackStateUpdate (HITINFO_AFFECTS_VICTIM, target, 1, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_HIT, 0);
             return true;
@@ -2339,7 +2345,7 @@ public:
             uint32 absorb = dmgInfo.GetAbsorb();
             uint32 resist = dmgInfo.GetResist();
             Unit::DealDamageMods(target, damage, &absorb);
-            Unit::DealDamage(attacker, target, damage, nullptr, DIRECT_DAMAGE, schoolmask, nullptr, false);
+            Unit::DealDamage(attacker, target, damage, 0, DIRECT_DAMAGE, schoolmask, nullptr, false);
             attacker->SendAttackStateUpdate(HITINFO_AFFECTS_VICTIM, target, 0, schoolmask, damage, absorb, resist, VICTIMSTATE_HIT, 0);
             return true;
         }

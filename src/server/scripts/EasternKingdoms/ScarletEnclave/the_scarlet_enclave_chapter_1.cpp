@@ -37,6 +37,8 @@
 ##Quest 12848
 ######*/
 
+namespace TheScarletEnclave::Chapter1
+{
 #define GCD_CAST    1
 
 enum UnworthyInitiate
@@ -382,7 +384,7 @@ struct npc_eye_of_acherus : public ScriptedAI
 {
     npc_eye_of_acherus(Creature* creature) : ScriptedAI(creature)
     {
-        creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid1);
+        creature->SetDisplayFromModel(0);
         creature->SetReactState(REACT_PASSIVE);
     }
 
@@ -1065,9 +1067,11 @@ class spell_gift_of_the_harvester : public SpellScript
         OnEffectHitTarget.Register(&spell_gift_of_the_harvester::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
     }
 };
+}
 
 void AddSC_the_scarlet_enclave_chapter_1()
 {
+    using namespace TheScarletEnclave::Chapter1;
     new npc_unworthy_initiate();
     new npc_unworthy_initiate_anchor();
     new go_acherus_soul_prison();

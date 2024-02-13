@@ -20,13 +20,14 @@
 #include "MotionMaster.h"
 #include "GridNotifiersImpl.h"
 #include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "ScriptedEscortAI.h"
 #include "Player.h"
 #include "InstanceScript.h"
 
+namespace ShadowfangKeep
+{
 enum Events
 {
 };
@@ -147,9 +148,11 @@ public:
         return true;
     }
 };
+}
 
 void AddSC_shadowfang_keep()
 {
+    using namespace ShadowfangKeep;
     RegisterSpellScript(spell_sfk_shield_of_bones);
     new at_sfk_outside_troups();
     new at_sfk_outside_ivar_bloodfang();

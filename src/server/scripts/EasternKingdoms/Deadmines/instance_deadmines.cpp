@@ -24,10 +24,11 @@
 #include "MotionMaster.h"
 #include "TemporarySummon.h"
 #include "VehicleDefines.h"
-#include "WorldPacket.h"
 #include "Player.h"
 #include "CreatureAIImpl.h"
 
+namespace Deadmines
+{
 enum EventIds
 {
     EVENT_SPAWN_GOBLIN_EVENT = 1,
@@ -929,8 +930,10 @@ class instance_deadmines : public InstanceMapScript
             return new instance_deadmines_InstanceMapScript(map);
         }
 };
+}
 
 void AddSC_instance_deadmines()
 {
+    using namespace Deadmines;
     new instance_deadmines();
 }

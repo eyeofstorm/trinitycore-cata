@@ -27,6 +27,8 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "stratholme.h"
 
+namespace Stratholme::MalekiThePallid
+{
 enum Spells
 {
     SPELL_FROSTBOLT     = 17503,
@@ -90,7 +92,7 @@ public:
                     case EVENT_FROSTBOLT:
                         if (rand32() % 90)
                             DoCastVictim(SPELL_FROSTBOLT);
-                        _events.ScheduleEvent(EVENT_FROSTBOLT, 3.5 * IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_FROSTBOLT, 3.5 * AsUnderlyingType(IN_MILLISECONDS));
                         break;
                     case EVENT_ICETOMB:
                         if (rand32() % 65)
@@ -120,8 +122,11 @@ public:
         return GetStratholmeAI<boss_maleki_the_pallidAI>(creature);
     }
 };
+}
 
 void AddSC_boss_maleki_the_pallid()
 {
+    using namespace Stratholme;
+    using namespace Stratholme::MalekiThePallid;
     new boss_maleki_the_pallid();
 }

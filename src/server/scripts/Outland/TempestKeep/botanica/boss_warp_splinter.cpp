@@ -29,6 +29,8 @@ EndScriptData */
 #include "TemporarySummon.h"
 #include "the_botanica.h"
 
+namespace Botanica::WarpSplinter
+{
 enum Says
 {
     SAY_AGGRO          = 0,
@@ -192,8 +194,8 @@ class boss_warp_splinter : public CreatureScript
                 {
                     float angle = (float(M_PI) / 3) * i;
 
-                    float X = Treant_Spawn_Pos_X + TREANT_SPAWN_DIST * std::cos(angle);
-                    float Y = Treant_Spawn_Pos_Y + TREANT_SPAWN_DIST * std::sin(angle);
+                    float X = Treant_Spawn_Pos_X + float(TREANT_SPAWN_DIST) * std::cos(angle);
+                    float Y = Treant_Spawn_Pos_Y + float(TREANT_SPAWN_DIST) * std::sin(angle);
                     float O = - me->GetAngle(X, Y);
 
                     if (Creature* pTreant = me->SummonCreature(CREATURE_TREANT, treant_pos[i][0], treant_pos[i][1], treant_pos[i][2], O, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 25000))
@@ -243,9 +245,12 @@ class boss_warp_splinter : public CreatureScript
             return GetBotanicaAI<boss_warp_splinterAI>(creature);
         }
 };
+}
 
 void AddSC_boss_warp_splinter()
 {
+    using namespace Botanica;
+    using namespace Botanica::WarpSplinter;
     new boss_warp_splinter();
     new npc_warp_splinter_treant();
 }

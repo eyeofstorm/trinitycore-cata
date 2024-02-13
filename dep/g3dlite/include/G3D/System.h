@@ -24,6 +24,10 @@
 #include <sys/time.h>
 #endif
 
+#if defined(__aarch64__)
+#include <sys/time.h>
+#endif
+
 #ifdef G3D_OSX
 #define Zone OSX_Zone
 #   include <CoreServices/CoreServices.h>

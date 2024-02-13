@@ -21,7 +21,6 @@
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
-#include "GameObject.h"
 #include "GameObjectAI.h"
 #include "Object.h"
 #include "Map.h"
@@ -35,6 +34,8 @@
 
 #include <vector>
 
+namespace BastionOfTwilight
+{
 enum PhaseTwist
 {
     // Events
@@ -378,9 +379,11 @@ public:
 private:
     uint32 _dataType;
 };
+}
 
 void AddSC_bastion_of_twilight()
 {
+    using namespace BastionOfTwilight;
     RegisterBastionOfTwilightCreatureAI(npc_bot_invisible_stalker_phase_twist);
     RegisterBastionOfTwilightCreatureAI(npc_bot_chogall);
     RegisterBastionOfTwilightCreatureAI(npc_bot_evolved_drakonaar);

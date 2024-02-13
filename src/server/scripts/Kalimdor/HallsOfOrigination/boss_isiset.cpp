@@ -22,8 +22,9 @@
 #include "SpellAuraEffects.h"
 #include "halls_of_origination.h"
 #include "InstanceScript.h"
-#include "TemporarySummon.h"
 
+namespace HallsOfOrigination::Isiset
+{
 enum Spells
 {
     SPELL_SUPERNOVA                         = 74136,
@@ -824,9 +825,12 @@ public:
         return new spell_isiset_call_of_sky_SpellScript();
     }
 };
+}
 
 void AddSC_boss_isiset()
 {
+    using namespace HallsOfOrigination;
+    using namespace HallsOfOrigination::Isiset;
     new boss_isiset();
     new npc_celestial_familiar();
     new npc_isiset_mirror_image();

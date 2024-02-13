@@ -24,15 +24,15 @@
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
-#include "TemporarySummon.h"
 #include "PassiveAI.h"
 #include "GridNotifiers.h"
-#include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "Weather.h"
 #include "ObjectAccessor.h"
 #include "MotionMaster.h"
 
+namespace HallsOfOrigination::EarthRagerPtah
+{
 enum Texts
 {
     SAY_DEATH       = 0,
@@ -401,9 +401,12 @@ class achievement_straw_broke_camels_back : public AchievementCriteriaScript
             return false;
         }
 };
+}
 
 void AddSC_boss_earthrager_ptah()
 {
+    using namespace HallsOfOrigination;
+    using namespace HallsOfOrigination::EarthRagerPtah;
     RegisterHallsOfOriginationCreatureAI(boss_earthrager_ptah);
     RegisterHallsOfOriginationCreatureAI(npc_ptah_beetle_stalker);
     RegisterSpellScript(spell_earthrager_ptah_flame_bolt);

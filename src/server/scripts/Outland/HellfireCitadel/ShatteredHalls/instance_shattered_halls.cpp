@@ -28,11 +28,12 @@ EndScriptData */
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "shattered_halls.h"
-#include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 
+namespace ShatteredHalls
+{
 DoorData const doorData[] =
 {
     { GO_GRAND_WARLOCK_CHAMBER_DOOR_1, DATA_NETHEKURSE, DOOR_TYPE_PASSAGE },
@@ -279,8 +280,10 @@ class instance_shattered_halls : public InstanceMapScript
             uint32 _team;
         };
 };
+}
 
 void AddSC_instance_shattered_halls()
 {
+    using namespace ShatteredHalls;
     new instance_shattered_halls();
 }

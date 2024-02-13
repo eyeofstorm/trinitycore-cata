@@ -15,11 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "zulgurub.h"
 
+namespace ZulGurub::Renataki
+{
 enum Yells
 {
 };
@@ -84,8 +85,11 @@ class boss_renataki : public CreatureScript
             return new boss_renatakiAI(creature);
         }
 };
+}
 
 void AddSC_boss_renataki()
 {
+    using namespace ZulGurub;
+    using namespace ZulGurub::Renataki;
     new boss_renataki();
 }

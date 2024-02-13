@@ -35,8 +35,9 @@ EndContentData */
 #include "Player.h"
 #include "ScriptedEscortAI.h"
 #include "TemporarySummon.h"
-#include "WorldSession.h"
 
+namespace Winterspring
+{
 enum Says
 {
     // Escort texts
@@ -594,9 +595,11 @@ class go_elune_fire : public GameObjectScript
             return new go_elune_fireAI(go);
         }
 };
+}
 
 void AddSC_winterspring()
 {
+    using namespace Winterspring;
     new npc_ranshalla();
     new go_elune_fire();
 }

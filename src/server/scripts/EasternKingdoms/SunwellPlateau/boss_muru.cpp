@@ -23,6 +23,8 @@
 #include "SpellScript.h"
 #include "sunwell_plateau.h"
 
+namespace SunwellPlateau::Muru
+{
 enum Spells
 {
     // Muru's spells
@@ -402,7 +404,7 @@ public:
 
         void Initialize()
         {
-            me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+            me->SetDisplayFromModel(1);
             me->SetReactState(REACT_PASSIVE);
             DoCast(me, SPELL_DARKFIEND_SKIN, true);
 
@@ -713,9 +715,12 @@ class spell_summon_blood_elves_periodic : public SpellScriptLoader
             return new spell_summon_blood_elves_periodic_AuraScript();
         }
 };
+}
 
 void AddSC_boss_muru()
 {
+    using namespace SunwellPlateau;
+    using namespace SunwellPlateau::Muru;
     new boss_muru();
     new boss_entropius();
     new npc_muru_portal();

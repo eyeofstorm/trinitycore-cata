@@ -17,17 +17,17 @@
 
 #include "vmapexport.h"
 #include "adtfile.h"
-#include "mpqfile.h"
 #include "Errors.h"
 #include "vec3d.h"
 #include "VMapDefinitions.h"
 #include "wmo.h"
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <cstdio>
 #include <cstdlib>
 
-    WMORoot::WMORoot(std::string const& filename)
+WMORoot::WMORoot(std::string const& filename)
     : filename(filename), color(0), nTextures(0), nGroups(0), nPortals(0), nLights(0),
     nDoodadNames(0), nDoodadDefs(0), nDoodadSets(0), RootWMOID(0), flags(0)
 {

@@ -86,6 +86,39 @@ void Unit::UpdateDamagePhysical(WeaponAttackType attType)
     }
 }
 
+int32 Unit::GetCreatePowerValue(Powers power) const
+{
+    switch (power)
+    {
+        case POWER_MANA:
+            return GetCreateMana();
+        case POWER_RAGE:
+            if (IsPlayer()) // only players are allowed to use rage
+                return 1000;
+            break;
+        case POWER_FOCUS:
+            return 100;
+        case POWER_ENERGY:
+            return 100;
+        case POWER_RUNIC_POWER:
+            return 1000;
+        case POWER_RUNE:
+            return 0;
+        case POWER_SOUL_SHARDS:
+            return 3;
+        case POWER_ECLIPSE:
+            return 100;
+        case POWER_HOLY_POWER:
+            return 3;
+        case POWER_HEALTH:
+            return 0;
+        default:
+            break;
+    }
+
+    return 0;
+}
+
 /*#######################################
 ########                         ########
 ########   PLAYERS STAT SYSTEM   ########
@@ -321,11 +354,11 @@ void Player::UpdateMaxPower(Powers power)
     if (powerIndex == MAX_POWERS || powerIndex >= MAX_POWERS_PER_CLASS)
         return;
 
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(power));
 
-    float bonusPower = (power == POWER_MANA && GetCreatePowers(power) > 0) ? GetManaBonusFromIntellect() : 0;
+    float bonusPower = (power == POWER_MANA && GetCreatePowerValue(power) > 0) ? GetManaBonusFromIntellect() : 0;
 
-    float value = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    float value = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowerValue(power);
     value *= GetPctModifierValue(unitMod, BASE_PCT);
     value += GetFlatModifierValue(unitMod, TOTAL_VALUE) +  bonusPower;
     value *= GetPctModifierValue(unitMod, TOTAL_PCT);
@@ -940,9 +973,9 @@ void Creature::UpdateMaxPower(Powers power)
     if (GetPowerIndex(power) == MAX_POWERS)
         return;
 
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(power));
 
-    float value = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    float value = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowerValue(power);
     value *= GetPctModifierValue(unitMod, BASE_PCT);
     value += GetFlatModifierValue(unitMod, TOTAL_VALUE);
     value *= GetPctModifierValue(unitMod, TOTAL_PCT);
@@ -1169,12 +1202,12 @@ void Guardian::UpdateMaxPower(Powers power)
     if (GetPowerIndex(power) == MAX_POWERS)
         return;
 
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + AsUnderlyingType(power));
 
     float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
     float multiplicator = 15.0f;
 
-    float value  = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    float value  = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreatePowerValue(power);
     value *= GetPctModifierValue(unitMod, BASE_PCT);
     value += GetFlatModifierValue(unitMod, TOTAL_VALUE) + addValue * multiplicator;
     value *= GetPctModifierValue(unitMod, TOTAL_PCT);
@@ -1232,14 +1265,14 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         //force of nature
         if (GetEntry() == ENTRY_TREANT)
         {
-            int32 spellDmg = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) + m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
+            int32 spellDmg = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + AsUnderlyingType(SPELL_SCHOOL_NATURE))) + m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + AsUnderlyingType(SPELL_SCHOOL_NATURE));
             if (spellDmg > 0)
                 bonusDamage = spellDmg * 0.09f;
         }
         //greater fire elemental
         else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
         {
-            int32 spellDmg = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) + m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+            int32 spellDmg = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + AsUnderlyingType(SPELL_SCHOOL_FIRE))) + m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + AsUnderlyingType(SPELL_SCHOOL_FIRE));
             if (spellDmg > 0)
                 bonusDamage = spellDmg * 0.4f;
         }

@@ -21,12 +21,13 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "InstanceScript.h"
-#include "shadowfang_keep.h"
 #include "Map.h"
 #include "Creature.h"
 #include "EventMap.h"
 #include "CreatureAI.h"
 
+namespace ShadowfangKeep
+{
 ObjectData const creatureData[] =
 {
     { BOSS_BARON_ASHBURY,               DATA_BARON_ASHBURY          },
@@ -157,7 +158,7 @@ public:
             switch (creature->GetEntry())
             {
                 case NPC_FORSAKEN_BLIGHTSPREADER:
-                    creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid1);
+                    creature->SetDisplayFromModel(0);
                     break;
                 case NPC_HIGH_WARLORD_CROMUSH:
                     if (creature->ToTempSummon())
@@ -301,8 +302,10 @@ public:
         return new instance_shadowfang_keep_InstanceMapScript(map);
     }
 };
+}
 
 void AddSC_instance_shadowfang_keep()
 {
+    using namespace ShadowfangKeep;
     new instance_shadowfang_keep();
 }

@@ -32,6 +32,8 @@ EndScriptData */
 #include "serpent_shrine.h"
 #include "TemporarySummon.h"
 
+namespace SerpentShrine::LeotherasTheBlind
+{
 enum LeotherasTheBlind
 {
     // Spells used by Leotheras The Blind
@@ -217,7 +219,7 @@ public:
             IsFinalForm = false;
             NeedThreatReset = false;
             EnrageUsed = false;
-            memset(InnderDemon, 0, sizeof(InnderDemon));
+            InnderDemon.fill(ObjectGuid::Empty);
             InnerDemon_Count = 0;
         }
 
@@ -238,7 +240,7 @@ public:
         bool EnrageUsed;
         float x, y, z;
 
-        ObjectGuid InnderDemon[5];
+        std::array<ObjectGuid, 5> InnderDemon;
         uint32 InnerDemon_Count;
         ObjectGuid Demon;
         ObjectGuid SpellBinderGUID[3];
@@ -810,9 +812,12 @@ public:
         void JustDied(Unit* /*killer*/) override { }
     };
 };
+}
 
 void AddSC_boss_leotheras_the_blind()
 {
+    using namespace SerpentShrine;
+    using namespace SerpentShrine::LeotherasTheBlind;
     new boss_leotheras_the_blind();
     new boss_leotheras_the_blind_demonform();
     new npc_greyheart_spellbinder();

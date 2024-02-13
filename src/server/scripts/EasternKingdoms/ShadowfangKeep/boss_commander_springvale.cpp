@@ -19,15 +19,16 @@
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "Spell.h"
 #include "SpellAuras.h"
-#include "SpellAuraEffects.h"
+#include "SpellScript.h"
 #include "Player.h"
 #include "InstanceScript.h"
 #include "MotionMaster.h"
 #include "CreatureAIImpl.h"
 #include "Map.h"
 
+namespace ShadowfangKeep::CommanderSpringvale
+{
 enum Spells
 {
     // Commander Springvale
@@ -525,9 +526,12 @@ public:
         return new spell_sfk_unholy_empowerment_SpellScript();
     }
 };
+}
 
 void AddSC_boss_commander_springvale()
 {
+    using namespace ShadowfangKeep;
+    using namespace ShadowfangKeep::CommanderSpringvale;
     new boss_commander_springvale();
     new npc_wailing_guardsman();
     new npc_tormented_officer();

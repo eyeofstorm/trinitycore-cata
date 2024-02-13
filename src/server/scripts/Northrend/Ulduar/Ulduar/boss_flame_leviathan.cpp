@@ -39,6 +39,8 @@
 #include "ulduar.h"
 #include "Vehicle.h"
 
+namespace Ulduar::FlameLeviathan
+{
 enum Spells
 {
     SPELL_PURSUED                  = 62374,
@@ -614,7 +616,7 @@ class boss_flame_leviathan_seat : public CreatureScript
             boss_flame_leviathan_seatAI(Creature* creature) : ScriptedAI(creature)
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+                me->SetDisplayFromModel(1);
                 instance = creature->GetInstanceScript();
             }
 
@@ -1719,9 +1721,12 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
             return new spell_vehicle_throw_passenger_SpellScript();
         }
 };
+}
 
 void AddSC_boss_flame_leviathan()
 {
+    using namespace Ulduar;
+    using namespace Ulduar::FlameLeviathan;
     new boss_flame_leviathan();
     new boss_flame_leviathan_seat();
     new boss_flame_leviathan_defense_turret();

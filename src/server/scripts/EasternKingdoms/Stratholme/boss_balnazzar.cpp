@@ -19,6 +19,8 @@
 #include "ScriptedCreature.h"
 #include "stratholme.h"
 
+namespace Stratholme::Balnazzar
+{
 enum Spells
 {
     // Balnazzar
@@ -46,7 +48,7 @@ enum Texts
 
 struct boss_balnazzar : public BossAI
 {
-    boss_balnazzar(Creature* creature) : BossAI(creature, DATA_BALNAZZAR) { }
+    boss_balnazzar(Creature* creature) : BossAI(creature, BOSS_BALNAZZAR) { }
 
     void JustEngagedWith(Unit* who) override
     {
@@ -118,8 +120,11 @@ struct boss_balnazzar : public BossAI
         DoMeleeAttackIfReady();
     }
 };
+}
 
 void AddSC_boss_balnazzar()
 {
+    using namespace Stratholme;
+    using namespace Stratholme::Balnazzar;
     RegisterStratholmeCreatureAI(boss_balnazzar);
 }

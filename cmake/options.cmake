@@ -13,9 +13,9 @@ option(SERVERS          "Build worldserver and bnetserver"               1)
 set(SCRIPTS_AVAILABLE_OPTIONS none static dynamic minimal-static minimal-dynamic)
 
 # Log a fatal error when the value of the SCRIPTS variable isn't a valid option.
-if (SCRIPTS)
-  list (FIND SCRIPTS_AVAILABLE_OPTIONS "${SCRIPTS}" SCRIPTS_INDEX)
-  if (${SCRIPTS_INDEX} EQUAL -1)
+if(SCRIPTS)
+  list(FIND SCRIPTS_AVAILABLE_OPTIONS "${SCRIPTS}" SCRIPTS_INDEX)
+  if(${SCRIPTS_INDEX} EQUAL -1)
     message(FATAL_ERROR "The value (${SCRIPTS}) of your SCRIPTS variable is invalid! "
                         "Allowed values are: ${SCRIPTS_AVAILABLE_OPTIONS}")
   endif()
@@ -37,10 +37,10 @@ option(USE_SCRIPTPCH    "Use precompiled headers when compiling scripts"        
 option(USE_COREPCH      "Use precompiled headers when compiling servers"              1)
 option(WITH_DYNAMIC_LINKING "Enable dynamic library linking."                         0)
 IsDynamicLinkingRequired(WITH_DYNAMIC_LINKING_FORCED)
-if (WITH_DYNAMIC_LINKING AND WITH_DYNAMIC_LINKING_FORCED)
+if(WITH_DYNAMIC_LINKING AND WITH_DYNAMIC_LINKING_FORCED)
   set(WITH_DYNAMIC_LINKING_FORCED OFF)
 endif()
-if (WITH_DYNAMIC_LINKING OR WITH_DYNAMIC_LINKING_FORCED)
+if(WITH_DYNAMIC_LINKING OR WITH_DYNAMIC_LINKING_FORCED)
   set(BUILD_SHARED_LIBS ON)
 else()
   set(BUILD_SHARED_LIBS OFF)
@@ -51,4 +51,4 @@ set(WITH_SOURCE_TREE    "hierarchical" CACHE STRING "Build the source tree for I
 set_property(CACHE WITH_SOURCE_TREE PROPERTY STRINGS no flat hierarchical hierarchical-folders)
 option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
 option(BUILD_TESTING    "Build test suite" 0)
-
+option(UNITY_BUILDS     "Enables the unity build mode which combines multiple source files into buckets to speed up build time" 0)

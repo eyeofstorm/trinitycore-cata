@@ -25,7 +25,6 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
-#include "Opcodes.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -174,7 +173,7 @@ void AuraApplication::_InitFlags(Unit* caster, uint8 effMask)
         return false;
     }();
 
-    if (GetBase()->GetSpellInfo()->HasAttribute(SPELL_ATTR8_AURA_SEND_AMOUNT) || effectNeedsAmount)
+    if (GetBase()->GetSpellInfo()->HasAttribute(SPELL_ATTR8_AURA_POINTS_ON_CLIENT) || effectNeedsAmount)
         _flags |= AFLAG_SCALABLE;
 }
 
@@ -1117,71 +1116,11 @@ bool Aura::CanBeSaved() const
         return false;
 
     // Check if aura is single target, not only spell info
-    if (GetCasterGUID() != GetOwner()->GetGUID())
-    {
-        // owner == caster for area auras, check for possible bad data in DB
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        {
-            if (!GetSpellInfo()->Effects[i].IsEffect())
-                continue;
-
-            if (GetSpellInfo()->Effects[i].IsTargetingArea() || GetSpellInfo()->Effects[i].IsAreaAuraEffect())
-                return false;
-        }
-
-        if (IsSingleTarget() || GetSpellInfo()->IsSingleTarget())
+    if (GetCasterGUID() != GetOwner()->GetGUID() || IsSingleTarget())
+        if (GetSpellInfo()->IsSingleTarget())
             return false;
-    }
 
-    // don't save liquid auras
-    if (GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_LIQUID_AURA))
-        return false;
-
-    // Can't be saved - aura handler relies on calculated amount and changes it
-    if (HasEffectType(SPELL_AURA_CONVERT_RUNE))
-        return false;
-
-    // No point in saving this, since the stable dialog can't be open on aura load anyway.
-    if (HasEffectType(SPELL_AURA_OPEN_STABLE))
-        return false;
-
-    // Can't save vehicle auras, it requires both caster & target to be in world
-    if (HasEffectType(SPELL_AURA_CONTROL_VEHICLE))
-        return false;
-
-    // do not save bind sight auras
-    if (HasEffectType(SPELL_AURA_BIND_SIGHT))
-        return false;
-
-    // no charming auras (taking direct control)
-    if (HasEffectType(SPELL_AURA_MOD_POSSESS))
-        return false;
-
-    // no charming auras can be saved
-    if (HasEffectType(SPELL_AURA_MOD_CHARM) || HasEffectType(SPELL_AURA_AOE_CHARM))
-        return false;
-
-    // Incanter's Absorbtion - considering the minimal duration and problems with aura stacking
-    // we skip saving this aura
-    // Also for some reason other auras put as MultiSlot crash core on keeping them after restart,
-    // so put here only these for which you are sure they get removed
-    switch (GetId())
-    {
-        case 44413: // Incanter's Absorption
-        case 40075: // Fel Flak Fire
-        case 55849: // Power Spark
-        case 96206: // Nature's Bounty
-        case 81206: // Chakra: Sanctuary
-        case 81207: // Chakra: Sanctuary
-        case 81208: // Chakra: Serenity
-        case 81209: // Chakra: Chastise
-        case 68631: // Curse of the Worgen
-        case 89912: // Chakra Flow
-            return false;
-    }
-
-    // When a druid logins, he doesnt have either eclipse power, nor the marker auras, nor the eclipse buffs. Dont save them.
-    if (GetId() == 67483 || GetId() == 67484 || GetId() == 48517 || GetId() == 48518 || GetId() == 94338)
+    if (GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED))
         return false;
 
     // don't save auras removed by proc system
@@ -1189,7 +1128,7 @@ bool Aura::CanBeSaved() const
         return false;
 
     // don't save permanent auras triggered by items, they'll be recasted on login if necessary
-    if (GetCastItemGUID() && IsPermanent())
+    if (!GetCastItemGUID().IsEmpty() && IsPermanent())
         return false;
 
     return true;
@@ -1887,6 +1826,18 @@ uint8 Aura::GetProcEffectMask(AuraApplication* aurApp, ProcEventInfo& eventInfo,
 
         if (spell->GetSpellInfo()->HasAttribute(SPELL_ATTR4_SUPPRESS_WEAPON_PROCS) && GetSpellInfo()->HasAttribute(SPELL_ATTR6_AURA_IS_WEAPON_PROC))
             return 0;
+
+        if (eventInfo.GetTypeMask() & TAKEN_HIT_PROC_FLAG_MASK)
+        {
+            if (spell->GetSpellInfo()->HasAttribute(SPELL_ATTR3_SUPPRESS_TARGET_PROCS)
+                && !GetSpellInfo()->HasAttribute(SPELL_ATTR7_CAN_PROC_FROM_SUPPRESSED_TARGET_PROCS))
+                return 0;
+        }
+        else
+        {
+            if (spell->GetSpellInfo()->HasAttribute(SPELL_ATTR3_SUPPRESS_CASTER_PROCS))
+                return 0;
+        }
     }
 
     // check don't break stealth attr present
@@ -2248,6 +2199,20 @@ void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const* aurEff, SpellM
     }
 }
 
+void Aura::CallScriptCalcDamageAndHealingHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp, Unit* victim, int32& damageOrHealing, int32& flatMod, float& pctMod)
+{
+    for (auto scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_CALC_DAMAGE_AND_HEALING, aurApp);
+        auto effEndItr = (*scritr)->DoEffectCalcDamageAndHealing.end(), effItr = (*scritr)->DoEffectCalcDamageAndHealing.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->Filter(m_spellInfo, SpellEffIndex(aurEff->GetEffIndex())))
+                effItr->Call(aurEff, victim, damageOrHealing, flatMod, pctMod);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
 void Aura::CallScriptEffectAbsorbHandlers(AuraEffect* aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & absorbAmount, bool& defaultPrevented)
 {
     for (auto scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
@@ -2473,6 +2438,9 @@ void UnitAura::Remove(AuraRemoveFlags removeMode)
 
 void UnitAura::FillTargetMap(std::unordered_map<Unit*, uint8>& targets, Unit* caster)
 {
+    if (GetSpellInfo()->HasAttribute(SPELL_ATTR7_DISABLE_AURA_WHILE_DEAD) && !GetUnitOwner()->IsAlive())
+        return;
+
     Unit* ref = caster;
     if (!ref)
         ref = GetUnitOwner();

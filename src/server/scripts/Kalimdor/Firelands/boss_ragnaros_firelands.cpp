@@ -35,6 +35,8 @@
 
 #include "boost/container/flat_set.hpp"
 
+namespace Firelands::RagnarosFirelands
+{
 enum Spells
 {
     // Ragnaros
@@ -79,8 +81,7 @@ enum Spells
     // Magma Trap
     SPELL_MAGMA_TRAP_VISUAL                     = 98179,
     SPELL_MAGMA_TRAP_PERIODIC_AURA              = 98172,
-    SPELL_MAGMA_TRAP_VULNERABILITY              = 100238,
-    SPELL_MAGMA_TRAP_ERUPTION                   = 100107,
+    SPELL_MAGMA_TRAP_ERUPTION                   = 98175,
 
     // Sulfuras Smash
     SPELL_LAVA_WAVE_N                           = 98874,
@@ -1519,7 +1520,7 @@ class spell_ragnaros_magma_trap_periodic : public SpellScript
 {
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_MAGMA_TRAP_ERUPTION, SPELL_MAGMA_TRAP_VULNERABILITY });
+        return ValidateSpellInfo({ SPELL_MAGMA_TRAP_ERUPTION });
     }
 
     void FilterTargets(std::list<WorldObject*>& targets)
@@ -1537,9 +1538,6 @@ class spell_ragnaros_magma_trap_periodic : public SpellScript
             return;
 
         caster->CastSpell(nullptr, SPELL_MAGMA_TRAP_ERUPTION);
-
-        if (caster->GetMap()->IsHeroic())
-            caster->CastSpell(nullptr, SPELL_MAGMA_TRAP_VULNERABILITY);
 
         caster->RemoveAllAuras();
 
@@ -2451,9 +2449,12 @@ class spell_ragnaros_superheated : public SpellScript
         OnObjectAreaTargetSelect.Register(&spell_ragnaros_superheated::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
     }
 };
+}
 
 void AddSC_boss_ragnaros_firelands()
 {
+    using namespace Firelands;
+    using namespace Firelands::RagnarosFirelands;
     RegisterFirelandsCreatureAI(boss_ragnaros_firelands);
     RegisterFirelandsCreatureAI(npc_ragnaros_son_of_flame);
     RegisterFirelandsCreatureAI(npc_ragnaros_lava_scion);

@@ -28,6 +28,8 @@
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 
+namespace IcecrownCitadel::LordMarrowgar
+{
 enum ScriptTexts
 {
     SAY_ENTER_ZONE              = 0,
@@ -578,7 +580,7 @@ class spell_marrowgar_coldflame_damage : public SpellScriptLoader
                 if (target->HasAura(SPELL_IMPALED))
                     return false;
 
-                if (target->GetExactDist2d(GetOwner()) > GetSpellInfo()->Effects[EFFECT_0].CalcRadius())
+                if (target->GetExactDist2d(GetOwner()) > GetSpellInfo()->Effects[EFFECT_0].CalcRadius(nullptr, SpellTargetIndex::TargetB))
                     return false;
 
                 if (Aura* aur = target->GetAura(GetId()))
@@ -758,9 +760,12 @@ class at_lord_marrowgar_entrance : public OnlyOnceAreaTriggerScript
         }
 
 };
+}
 
 void AddSC_boss_lord_marrowgar()
 {
+    using namespace IcecrownCitadel;
+    using namespace IcecrownCitadel::LordMarrowgar;
     new boss_lord_marrowgar();
     new npc_coldflame();
     new npc_bone_spike();

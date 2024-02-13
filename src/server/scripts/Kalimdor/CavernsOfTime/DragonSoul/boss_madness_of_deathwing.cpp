@@ -40,6 +40,8 @@
 
 #include <array>
 
+namespace DragonSoul::MadnessOfDeathwing
+{
 enum Texts
 {
     // Deathwing
@@ -314,7 +316,7 @@ enum Sounds
     MUSIC_ID_OUTRO          = 26600
 };
 
-enum Data
+enum Data : uint8
 {
     // Deathwing
     DATA_PLAYERS_ON_PLATFORM    = 0,
@@ -353,7 +355,7 @@ enum PhaseGroups
 };
 
 // Using own types to avoid order dependencies in header file
-enum DragonAspectForLimb
+enum DragonAspectForLimb : uint8
 {
     DRAGON_ASPECT_YSERA        = 0,
     DRAGON_ASPECT_KALECGOS     = 1,
@@ -557,7 +559,7 @@ struct boss_madness_of_deathwing : public BossAI
 
     void SetData(uint32 type, uint32 data) override
     {
-        if (type < DATA_PLAYERS_ON_PLATFORM + MAX_DRAGON_ASPECTS)
+        if (type < uint32(AsUnderlyingType(DATA_PLAYERS_ON_PLATFORM) + AsUnderlyingType(MAX_DRAGON_ASPECTS)))
         {
             uint8 dragonAspect = std::max<uint8>(0, type - DATA_PLAYERS_ON_PLATFORM);
             _playersAtAspects[dragonAspect] = data;
@@ -2605,9 +2607,12 @@ public:
         return true;
     }
 };
+}
 
 void AddSC_boss_madness_of_deathwing()
 {
+    using namespace DragonSoul;
+    using namespace DragonSoul::MadnessOfDeathwing;
     RegisterDragonSoulCreatureAI(boss_madness_of_deathwing);
     RegisterDragonSoulCreatureAI(npc_madness_of_deathwing_limb_tentacle);
     RegisterDragonSoulCreatureAI(npc_madness_of_deathwing_mutated_corruption);

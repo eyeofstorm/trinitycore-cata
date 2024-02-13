@@ -29,8 +29,11 @@
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "TemporarySummon.h"
 #include "Unit.h"
 
+namespace Spells::Shaman
+{
 enum ShamanSpells
 {
     SPELL_SHAMAN_ANCESTRAL_AWAKENING            = 52759,
@@ -278,17 +281,15 @@ class spell_sha_earth_shield : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
     {
         PreventDefaultAction();
-
         Unit* caster = GetCaster();
         if (!caster)
             return;
 
-        Unit* target = GetTarget();
-        int32 basePoints = caster->SpellHealingBonusDone(target, GetSpellInfo(), aurEff->GetAmount(), HEAL, EFFECT_0);
+        int32 bp = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), HEAL, aurEff->GetEffIndex());
         if (AuraEffect const* glyphEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_GLYPH_OF_EARTH_SHIELD, EFFECT_0))
-            AddPct(basePoints, glyphEff->GetAmount());
+            AddPct(bp, glyphEff->GetAmount());
 
-        target->CastSpell(target, SPELL_SHAMAN_EARTH_SHIELD_HEAL, CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()).AddSpellBP0(basePoints));
+        GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_EARTH_SHIELD_HEAL,  CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()).AddSpellBP0(bp));
     }
 
     void Register() override
@@ -1775,9 +1776,11 @@ class spell_sha_clearcasting : public AuraScript
         DoEffectCalcAmount.Register(&spell_sha_clearcasting::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     }
 };
+}
 
 void AddSC_shaman_spell_scripts()
 {
+    using namespace Spells::Shaman;
     RegisterSpellScript(spell_sha_ancestral_awakening);
     RegisterSpellScript(spell_sha_ancestral_awakening_proc);
     RegisterSpellScript(spell_sha_ancestral_healing);

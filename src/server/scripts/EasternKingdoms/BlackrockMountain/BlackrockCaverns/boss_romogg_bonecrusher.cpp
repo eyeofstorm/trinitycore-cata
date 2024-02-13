@@ -25,6 +25,8 @@
 #include "Map.h"
 #include "SpellInfo.h"
 
+namespace BlackrockCaverns::RomoggBonecrusher
+{
 enum Texts
 {
     SAY_AGGRO                   = 0,
@@ -208,7 +210,7 @@ struct npc_romogg_chains_of_woe : public NullCreatureAI
 
     void IsSummonedBy(Unit* /*summoner*/) override
     {
-        me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+        me->SetDisplayFromModel(1);
         DoCastSelf(SPELL_CHAINS_OF_WOE_TELEPORT);
         DoCastSelf(SPELL_CHAINS_OF_WOE_CHANNELED);
     }
@@ -324,9 +326,12 @@ class achievement_crushing_bones_and_cracking_skulls : public AchievementCriteri
             return false;
         }
 };
+}
 
 void AddSC_boss_romogg_bonecrusher()
 {
+    using namespace BlackrockCaverns;
+    using namespace BlackrockCaverns::RomoggBonecrusher;
     RegisterBlackrockCavernsCreatureAI(boss_romogg_bonecrusher);
     RegisterBlackrockCavernsCreatureAI(npc_romogg_chains_of_woe);
     RegisterSpellScript(spell_romogg_quake);

@@ -327,7 +327,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo) const
             break;
         }
         case CONDITION_AREAID:
-            condMeets = object->GetAreaId() == ConditionValue1;
+            condMeets = DBCManager::IsInArea(object->GetAreaId(), ConditionValue1);
             break;
         case CONDITION_SPELL:
         {
@@ -1084,6 +1084,26 @@ bool ConditionMgr::IsObjectMeetingVendorItemConditions(uint32 creatureId, uint32
 bool ConditionMgr::IsSpellUsedInSpellClickConditions(uint32 spellId) const
 {
     return SpellsUsedInSpellClickConditions.find(spellId) != SpellsUsedInSpellClickConditions.end();
+}
+
+/*static*/ bool ConditionMgr::IsPlayerMeetingCondition(Player const* player, PlayerConditionEntry const* playerCondition)
+{
+    // Blizzard has never shipped a proper PlayerCondition.dbc entry with Cataclysm and many of its entries are serverside. So we have to hardcode the checks on our own.
+    switch (playerCondition->ID)
+    {
+        case 9414:  return player->GetQuestStatus(46) == QUEST_STATUS_REWARDED;
+        case 12161: return player->GetQuestStatus(29279) == QUEST_STATUS_REWARDED;
+        case 12163: return player->GetQuestStatus(29283) == QUEST_STATUS_REWARDED;
+        case 12212: return player->GetQuestStatus(29281) == QUEST_STATUS_REWARDED;
+        case 12251: return player->GetReputationRank(72) == REP_REVERED;
+        case 12252: return player->GetReputationRank(72) == REP_EXALTED;
+        case 12380: return player->GetQuestStatus(29281) == QUEST_STATUS_REWARDED && player->GetQuestStatus(29283) == QUEST_STATUS_REWARDED && player->GetQuestStatus(29279) == QUEST_STATUS_REWARDED;
+        case 12515: return player->GetQuestStatus(29201) == QUEST_STATUS_REWARDED;
+        default:
+            return true;
+    }
+
+    return true;
 }
 
 ConditionMgr* ConditionMgr::instance()
@@ -2051,7 +2071,7 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond) const
                 return false;
             }
 
-            if (areaEntry->ParentAreaID != 0)
+            if (areaEntry->ParentAreaID != 0 && areaEntry->GetFlags().HasFlag(AreaFlags::IsSubzone))
             {
                 TC_LOG_ERROR("sql.sql", "%s requires to be in area (%u) which is a subzone but zone expected, skipped.", cond->ToString(true).c_str(), cond->ConditionValue1);
                 return false;

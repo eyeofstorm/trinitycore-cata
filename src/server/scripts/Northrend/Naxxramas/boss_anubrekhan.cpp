@@ -22,6 +22,8 @@
 #include "Player.h"
 #include "ScriptedCreature.h"
 
+namespace Naxxramas::AnubRekhan
+{
 enum AnubSays
 {
     SAY_AGGRO           = 0,
@@ -148,7 +150,7 @@ public:
             _JustDied();
 
             // start achievement timer (kill Maexna within 20 min)
-            instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+            instance->TriggerGameEvent(ACHIEV_TIMED_START_EVENT);
         }
 
         void JustEngagedWith(Unit* who) override
@@ -255,10 +257,12 @@ class at_anubrekhan_entrance : public OnlyOnceAreaTriggerScript
             return true;
         }
 };
+}
 
 void AddSC_boss_anubrekhan()
 {
+    using namespace Naxxramas;
+    using namespace Naxxramas::AnubRekhan;
     new boss_anubrekhan();
-
     new at_anubrekhan_entrance();
 }

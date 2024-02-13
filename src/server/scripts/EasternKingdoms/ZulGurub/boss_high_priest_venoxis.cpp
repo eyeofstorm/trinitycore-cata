@@ -29,6 +29,8 @@
 #include "ObjectAccessor.h"
 #include "Map.h"
 
+namespace ZulGurub::HighPriestVenoxis
+{
 enum Yells
 {
     SAY_AGGRO                       = 0,
@@ -95,6 +97,11 @@ enum WeaponDisplayIds
 {
     WEAPON_DISPLAY_ID_NONE  = 0,
     WEAPON_DISPLAY_ID_STAVE = 68821
+};
+
+enum Misc
+{
+    GAME_EVENT_ENABLE_ACHIEVEMENT = 28223
 };
 
 Position const PoisonCloudPositions[] =
@@ -223,6 +230,7 @@ struct boss_high_priest_venoxis : public BossAI
         events.ScheduleEvent(EVENT_WHISPERS_OF_HETHISS, 6s);
         events.ScheduleEvent(EVENT_TOXIC_LINK, 14s + 400ms);
         events.ScheduleEvent(EVENT_BLESSING_OF_THE_SNAKE_GOD, 34s);
+        instance->TriggerGameEvent(GAME_EVENT_ENABLE_ACHIEVEMENT);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -589,9 +597,12 @@ class spell_venom_withdrawal : public SpellScript
         OnEffectHitTarget.Register(&spell_venom_withdrawal::HandleKnockback, EFFECT_2, SPELL_EFFECT_LEAP_BACK);
     }
 };
+}
 
 void AddSC_boss_high_priest_venoxis()
 {
+    using namespace ZulGurub;
+    using namespace ZulGurub::HighPriestVenoxis;
     RegisterZulGurubCreatureAI(boss_high_priest_venoxis);
     RegisterSpellScript(spell_venoxis_venomous_effusion);
     RegisterSpellScript(spell_venoxis_whispers_of_hethiss);

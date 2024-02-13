@@ -29,6 +29,8 @@
 #include "Map.h"
 #include "blackwing_descent.h"
 
+namespace BlackwingDescent::Magmaw
+{
 enum Spells
 {
     // Magmaw
@@ -315,7 +317,7 @@ struct boss_magmaw : public BossAI
         {
             case NPC_PILLAR_OF_FLAME:
                 summon->CastSpell(summon, SPELL_PILLAR_OF_FLAME_DUMMY);
-                summon->SetDisplayId(summon->GetCreatureTemplate()->Modelid1);
+                summon->SetDisplayFromModel(0);
                 summon->DespawnOrUnsummon(7s);
                 Talk(SAY_ANNOUNCE_LAVA_PARASITES);
                 summons.Summon(summon);
@@ -533,7 +535,7 @@ private:
         if (pincer1)
         {
             pincer1->EnterVehicle(me, SEAT_MAGMAWS_PINCER_1);
-            pincer1->SetDisplayId(pincer1->GetCreatureTemplate()->Modelid3);
+            pincer1->SetDisplayFromModel(2);
             _bodyPartGUIDs[BODY_PART_PINCER_1] = pincer1->GetGUID();
         }
 
@@ -541,7 +543,7 @@ private:
         if (pincer2)
         {
             pincer2->EnterVehicle(me, SEAT_MAGMAWS_PINCER_2);
-            pincer2->SetDisplayId(pincer2->GetCreatureTemplate()->Modelid3);
+            pincer2->SetDisplayFromModel(2);
             _bodyPartGUIDs[BODY_PART_PINCER_2] = pincer2->GetGUID();
         }
 
@@ -1260,10 +1262,12 @@ class spell_magmaw_captured : public AuraScript
         OnEffectPeriodic.Register(&spell_magmaw_captured::HandleTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
     }
 };
-
+}
 
 void AddSC_boss_magmaw()
 {
+    using namespace BlackwingDescent;
+    using namespace BlackwingDescent::Magmaw;
     RegisterBlackwingDescentCreatureAI(boss_magmaw);
     RegisterBlackwingDescentCreatureAI(npc_magmaw_nefarian);
     RegisterBlackwingDescentCreatureAI(npc_magmaw_lava_parasite);

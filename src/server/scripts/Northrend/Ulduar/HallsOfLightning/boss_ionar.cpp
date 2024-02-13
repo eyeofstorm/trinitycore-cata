@@ -27,6 +27,8 @@
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
 
+namespace HallsOfLightning::Ionar
+{
 enum Spells
 {
     SPELL_BALL_LIGHTNING                          = 52780,
@@ -356,7 +358,7 @@ public:
                 Creature* ionar = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_IONAR));
                 if (ionar && ionar->IsAlive())
                 {
-                    if (me->GetDistance(ionar) > DATA_MAX_SPARK_DISTANCE)
+                    if (me->GetDistance(ionar) > float(DATA_MAX_SPARK_DISTANCE))
                     {
                         Position pos = ionar->GetPosition();
 
@@ -381,9 +383,12 @@ public:
         return GetHallsOfLightningAI<npc_spark_of_ionarAI>(creature);
     }
 };
+}
 
 void AddSC_boss_ionar()
 {
+    using namespace HallsOfLightning;
+    using namespace HallsOfLightning::Ionar;
     new boss_ionar();
     new npc_spark_of_ionar();
 }

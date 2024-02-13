@@ -25,6 +25,8 @@
 #include "MotionMaster.h"
 #include "lost_city_of_the_tolvir.h"
 
+namespace LostCityOfTheTolvir::Siamat
+{
 enum Texts
 {
     SAY_UNLEASHED       = 0,
@@ -194,7 +196,7 @@ struct boss_siamat : public BossAI
                 break;
             case NPC_CLOUD_BURST:
                 summons.Summon(summon);
-                summon->SetDisplayId(summon->GetCreatureTemplate()->Modelid2);
+                summon->SetDisplayFromModel(1);
                 break;
             case NPC_MINION_OF_SIAMAT_STORM:
                 summons.Summon(summon);
@@ -640,9 +642,12 @@ class spell_siamat_lightning_charge : public AuraScript
         OnEffectPeriodic.Register(&spell_siamat_lightning_charge::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
     }
 };
+}
 
 void AddSC_boss_siamat()
 {
+    using namespace LostCityOfTheTolvir;
+    using namespace LostCityOfTheTolvir::Siamat;
     RegisterLostCityOfTheTolvirAI(boss_siamat);
     RegisterLostCityOfTheTolvirAI(npc_siamat_servant_of_siamat);
     RegisterLostCityOfTheTolvirAI(npc_siamat_minion_of_siamat);

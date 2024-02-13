@@ -19,8 +19,8 @@
 #define _ARCHAEOLOGY_H
 
 #include "ArchaeologyMgr.h"
-#include "Common.h"
 #include "WorldSession.h"
+#include <array>
 
 #define DIGS_PER_SITE 3
 class Player;
@@ -68,7 +68,7 @@ class Archaeology
 
         // Site Functionality
         ContinentState _continentState[CONTINENT_SITES];
-        SiteData _site[CONTINENT_SITES * COUNT_CONT];
+        std::array<SiteData, CONTINENT_SITES* COUNT_CONT> _site;
 
         void LoadSitesFromDB();
         void VerifySites();

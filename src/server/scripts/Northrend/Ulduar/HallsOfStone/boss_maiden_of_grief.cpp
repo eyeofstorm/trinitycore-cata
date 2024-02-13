@@ -20,6 +20,8 @@
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 
+namespace HallsOfStone::MaidenOfGrief
+{
 enum Yells
 {
     SAY_AGGRO                           = 0,
@@ -67,8 +69,6 @@ class boss_maiden_of_grief : public CreatureScript
                 events.ScheduleEvent(EVENT_STORM_OF_GRIEF, 10000);
                 events.ScheduleEvent(EVENT_SHOCK_OF_SORROW, urand(20000, 25000));
                 events.ScheduleEvent(EVENT_PILLAR_OF_WOE, urand(5000, 15000));
-
-                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_GOOD_GRIEF_START_EVENT);
             }
 
             void JustEngagedWith(Unit* who) override
@@ -76,7 +76,7 @@ class boss_maiden_of_grief : public CreatureScript
                 BossAI::JustEngagedWith(who);
                 Talk(SAY_AGGRO);
 
-                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_GOOD_GRIEF_START_EVENT);
+                instance->TriggerGameEvent(ACHIEV_GOOD_GRIEF_START_EVENT);
             }
 
             void KilledUnit(Unit* who) override
@@ -144,8 +144,11 @@ class boss_maiden_of_grief : public CreatureScript
             return GetHallsOfStoneAI<boss_maiden_of_griefAI>(creature);
         }
 };
+}
 
 void AddSC_boss_maiden_of_grief()
 {
+    using namespace HallsOfStone;
+    using namespace HallsOfStone::MaidenOfGrief;
     new boss_maiden_of_grief();
 }

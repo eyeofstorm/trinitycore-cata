@@ -21,10 +21,10 @@
 #include "Creature.h"
 #include "EventMap.h"
 #include "Map.h"
-#include "ScriptMgr.h"
-#include "MotionMaster.h"
 #include "CreatureAI.h"
 
+namespace GrimBatol
+{
 ObjectData const creatureData[] =
 {
     { BOSS_GENERAL_UMBRISS,                 DATA_GENERAL_UMBRISS                },
@@ -244,8 +244,10 @@ class instance_grim_batol : public InstanceMapScript
             return new instance_grim_batol_InstanceMapScript(map);
         }
 };
+}
 
 void AddSC_instance_grim_batol()
 {
+    using namespace GrimBatol;
     new instance_grim_batol();
 }

@@ -24,7 +24,6 @@
 #include "MoveSplineInit.h"
 #include "PassiveAI.h"
 #include "Spell.h"
-#include "Vehicle.h"
 #include "Map.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
@@ -32,6 +31,8 @@
 #include "Player.h"
 #include "SpellScript.h"
 
+namespace MountHyjal
+{
 enum CommonDefines
 {
     // Move Points
@@ -566,7 +567,7 @@ private:
         if (Creature* warden = DoSummon(NPC_GROVE_WARDEN, GroveWardenSummonPositions[spawnIndex], 20000))
         {
             warden->DespawnOrUnsummon(3min);
-            warden->SetDisplayId(warden->GetCreatureTemplate()->Modelid1);
+            warden->SetDisplayFromModel(0);
             Position waypointPos = GroveWardenWaypointPosition1;
             Position homePos = me->GetHomePosition();
             if (me->GetExactDist2d(GroveWardenWaypointPosition1) < me->GetExactDist2d(GroveWardenWaypointPosition2))
@@ -729,9 +730,11 @@ class at_mh_hyjal_barrow_dens : public AreaTriggerScript
             return true;
         }
 };
+}
 
 void AddSC_mount_hyjal()
 {
+    using namespace MountHyjal;
     RegisterCreatureAI(npc_mh_aronus);
     RegisterCreatureAI(npc_mh_faerie_dragon);
     RegisterCreatureAI(npc_mh_twilight_inciter);

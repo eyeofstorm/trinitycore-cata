@@ -26,6 +26,8 @@
 #include "SpellScript.h"
 #include "Vehicle.h"
 
+namespace PitOfSaron
+{
 enum Spells
 {
     SPELL_FIREBALL              = 69583, //Ymirjar Flamebearer
@@ -270,7 +272,7 @@ class npc_pit_of_saron_icicle : public CreatureScript
         {
             npc_pit_of_saron_icicleAI(Creature* creature) : PassiveAI(creature)
             {
-                me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+                me->SetDisplayFromModel(0);
             }
 
             void IsSummonedBy(Unit* summoner) override
@@ -379,9 +381,11 @@ public:
         return true;
     }
 };
+}
 
 void AddSC_pit_of_saron()
 {
+    using namespace PitOfSaron;
     new npc_ymirjar_flamebearer();
     new npc_iceborn_protodrake();
     new npc_geist_ambusher();

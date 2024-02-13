@@ -20,12 +20,15 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Spell.h"
+#include "SpellScript.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "Player.h"
 #include "InstanceScript.h"
 #include "Map.h"
 
+namespace ShadowfangKeep::BaronAshbury
+{
 enum Spells
 {
     // Baron Ashbury
@@ -286,9 +289,12 @@ class spell_ashbury_dark_archangel_form : public AuraScript
         AfterEffectApply.Register(&spell_ashbury_dark_archangel_form::AfterApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
+}
 
 void AddSC_boss_baron_ashbury()
 {
+    using namespace ShadowfangKeep;
+    using namespace ShadowfangKeep::BaronAshbury;
     RegisterShadowfangKeepCreatureAI(boss_baron_ashbury);
     RegisterSpellScript(spell_ashbury_asphyxiate);
     RegisterSpellScript(spell_ashbury_pain_and_suffering);

@@ -22,6 +22,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+namespace HallsOfLightning::Loken
+{
 enum Texts
 {
     SAY_INTRO_1                                   = 0,
@@ -82,7 +84,7 @@ struct boss_loken : public BossAI
         events.ScheduleEvent(EVENT_ARC_LIGHTNING, 15s);
         events.ScheduleEvent(EVENT_LIGHTNING_NOVA, 20s);
         events.ScheduleEvent(EVENT_RESUME_PULSING_SHOCKWAVE, 1s);
-        instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMELY_DEATH_START_EVENT);
+        instance->TriggerGameEvent(ACHIEV_TIMELY_DEATH_START_EVENT);
         me->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
@@ -95,7 +97,6 @@ struct boss_loken : public BossAI
 
     void EnterEvadeMode(EvadeReason /*why*/) override
     {
-        instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMELY_DEATH_START_EVENT);
         _DespawnAtEvade();
     }
 
@@ -204,9 +205,12 @@ class spell_loken_pulsing_shockwave : public SpellScript
         OnEffectHitTarget.Register(&spell_loken_pulsing_shockwave::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
 };
+}
 
 void AddSC_boss_loken()
 {
+    using namespace HallsOfLightning;
+    using namespace HallsOfLightning::Loken;
     RegisterHallsOfLightningCreatureAI(boss_loken);
     RegisterSpellScript(spell_loken_pulsing_shockwave);
 }

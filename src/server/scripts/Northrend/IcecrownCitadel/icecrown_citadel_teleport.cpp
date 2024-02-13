@@ -27,6 +27,8 @@
 #include "SpellMgr.h"
 #include "Transport.h"
 
+namespace IcecrownCitadel
+{
 static std::vector<uint32> const TeleportSpells =
 {
     LIGHT_S_HAMMER_TELEPORT,        // 0
@@ -71,7 +73,7 @@ class icecrown_citadel_teleport : public GameObjectScript
                 if (TransportBase* transport = player->GetTransport())
                     transport->RemovePassenger(player);
 
-                player->CastSpell(player, spell->Id, true);
+                me->CastSpell(player, spell->Id, true);
                 return true;
             }
         };
@@ -106,9 +108,11 @@ class at_frozen_throne_teleport : public AreaTriggerScript
             return true;
         }
 };
+}
 
 void AddSC_icecrown_citadel_teleport()
 {
+    using namespace IcecrownCitadel;
     new icecrown_citadel_teleport();
     new at_frozen_throne_teleport();
 }

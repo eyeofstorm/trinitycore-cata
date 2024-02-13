@@ -21,13 +21,11 @@
 #include "AreaTrigger.h"
 #include "Corpse.h"
 #include "Creature.h"
-#include "CreatureAI.h"
 #include "DynamicObject.h"
 #include "GameObject.h"
 #include "Player.h"
 #include "Spell.h"
 #include "SpellInfo.h"
-#include "TemporarySummon.h"
 #include "UnitAI.h"
 #include "UpdateData.h"
 
@@ -1219,9 +1217,10 @@ namespace Trinity
     class NearestHostileUnitInAggroRangeCheck
     {
         public:
-            explicit NearestHostileUnitInAggroRangeCheck(Creature const* creature, bool useLOS = false) : _me(creature), _useLOS(useLOS)
+            explicit NearestHostileUnitInAggroRangeCheck(Creature const* creature, bool useLOS = false, bool ignoreCivilians = false) : _me(creature), _useLOS(useLOS), _ignoreCivilians(ignoreCivilians)
             {
             }
+
             bool operator()(Unit* u)
             {
                 if (!u->IsHostileTo(_me))
@@ -1236,12 +1235,19 @@ namespace Trinity
                 if (_useLOS && !u->IsWithinLOSInMap(_me))
                     return false;
 
+                // pets in aggressive do not attack civilians
+                if (_ignoreCivilians)
+                    if (Creature* c = u->ToCreature())
+                        if (c->IsCivilian())
+                            return false;
+
                 return true;
             }
 
     private:
             Creature const* _me;
             bool _useLOS;
+            bool _ignoreCivilians;
             NearestHostileUnitInAggroRangeCheck(NearestHostileUnitInAggroRangeCheck const&);
     };
 

@@ -225,17 +225,17 @@ void Arena::EndBattleground(uint32 winner)
 
         // In case of arena draw, follow this logic:
         // winnerArenaTeam => ALLIANCE, loserArenaTeam => HORDE
-        ArenaTeam* winnerArenaTeam = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? ALLIANCE : winner));
-        ArenaTeam* loserArenaTeam = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? HORDE : GetOtherTeam(winner)));
+        ArenaTeam* winnerArenaTeam = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? AsUnderlyingType(ALLIANCE) : winner));
+        ArenaTeam* loserArenaTeam = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? AsUnderlyingType(HORDE) : GetOtherTeam(winner)));
 
         if (winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)
         {
             // In case of arena draw, follow this logic:
             // winnerMatchmakerRating => ALLIANCE, loserMatchmakerRating => HORDE
             loserTeamRating = loserArenaTeam->GetRating();
-            loserMatchmakerRating = GetArenaMatchmakerRating(winner == 0 ? HORDE : GetOtherTeam(winner));
+            loserMatchmakerRating = GetArenaMatchmakerRating(winner == 0 ? AsUnderlyingType(HORDE) : GetOtherTeam(winner));
             winnerTeamRating = winnerArenaTeam->GetRating();
-            winnerMatchmakerRating = GetArenaMatchmakerRating(winner == 0 ? ALLIANCE : winner);
+            winnerMatchmakerRating = GetArenaMatchmakerRating(winner == 0 ? AsUnderlyingType(ALLIANCE) : winner);
 
             if (winner != 0)
             {
@@ -251,8 +251,8 @@ void Arena::EndBattleground(uint32 winner)
 
                 // bg team that the client expects is different to TeamId
                 // alliance 1, horde 0
-                uint8 winnerTeam = winner == ALLIANCE ? BG_TEAM_ALLIANCE : BG_TEAM_HORDE;
-                uint8 loserTeam = winner == ALLIANCE ? BG_TEAM_HORDE : BG_TEAM_ALLIANCE;
+                uint8 winnerTeam = winner == uint32(ALLIANCE) ? BG_TEAM_ALLIANCE : BG_TEAM_HORDE;
+                uint8 loserTeam = winner == uint32(ALLIANCE) ? BG_TEAM_HORDE : BG_TEAM_ALLIANCE;
 
                 _arenaTeamScores[winnerTeam].Assign(winnerChange, winnerMatchmakerRating, winnerArenaTeam->GetName());
                 _arenaTeamScores[loserTeam].Assign(loserChange, loserMatchmakerRating, loserArenaTeam->GetName());
@@ -309,6 +309,7 @@ void Arena::EndBattleground(uint32 winner)
                 {
                     // update achievement BEFORE personal rating update
                     uint32 rating = player->GetArenaPersonalRating(winnerArenaTeam->GetSlot());
+                    player->StartAchievementCriteria(AchievementCriteriaStartEvent::WinRankedArenaMatchWithTeamSize, 0);
                     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
                     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, GetMapId());
                     player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD));
@@ -335,7 +336,7 @@ void Arena::EndBattleground(uint32 winner)
                     loserArenaTeam->MemberLost(player, winnerMatchmakerRating, loserMatchmakerChange);
 
                     // Arena lost => reset the win_rated_arena having the "no_lose" condition
-                    player->ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE, 0);
+                    player->FailAchievementCriteria(AchievementCriteriaFailEvent::LoseRankedArenaMatchWithTeamSize, 0);
                 }
             }
 

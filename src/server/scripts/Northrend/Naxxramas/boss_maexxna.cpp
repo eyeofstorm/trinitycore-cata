@@ -25,6 +25,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+namespace Naxxramas::Maexxna
+{
 enum Spells
 {
     SPELL_WEB_WRAP              = 28622,
@@ -214,7 +216,7 @@ public:
             victimGUID = guid;
             if (Unit* victim = ObjectAccessor::GetUnit(*me, victimGUID))
             {
-                visibleTimer = (me->GetDistance2d(victim)/WEB_WRAP_MOVE_SPEED + 0.5f) * IN_MILLISECONDS;
+                visibleTimer = (me->GetDistance2d(victim)/WEB_WRAP_MOVE_SPEED + 0.5f) * AsUnderlyingType(IN_MILLISECONDS);
                 victim->CastSpell(victim, SPELL_WEB_WRAP, me->GetGUID());
             }
         }
@@ -248,9 +250,12 @@ public:
         return GetNaxxramasAI<npc_webwrapAI>(creature);
     }
 };
+}
 
 void AddSC_boss_maexxna()
 {
+    using namespace Naxxramas;
+    using namespace Naxxramas::Maexxna;
     new boss_maexxna();
     new npc_webwrap();
 }

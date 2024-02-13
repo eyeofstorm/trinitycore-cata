@@ -100,7 +100,7 @@ SpellTargetDirectionTypes SpellImplicitTargetInfo::GetDirectionType() const
     return _data[_target].DirectionType;
 }
 
-float SpellImplicitTargetInfo::CalcDirectionAngle() const
+float SpellImplicitTargetInfo::CalcDirectionAngle(SpellEffectInfo const& effectInfo) const
 {
     switch (GetDirectionType())
     {
@@ -121,7 +121,18 @@ float SpellImplicitTargetInfo::CalcDirectionAngle() const
         case TARGET_DIR_FRONT_LEFT:
             return static_cast<float>(M_PI/4);
         case TARGET_DIR_RANDOM:
-            return float(rand_norm())*static_cast<float>(2*M_PI);
+            return rand_norm() * static_cast<float>(2 * M_PI);
+        case TARGET_DIR_SUMMON:
+            // This direction does alter its angle based on what is being summoned.
+            // Creatures are being summoned on the left, gameobjects infront
+            switch (effectInfo.Effect)
+            {
+                case SPELL_EFFECT_SUMMON_PET:
+                case SPELL_EFFECT_SUMMON:
+                    return static_cast<float>(M_PI / 2);
+                default:
+                    return 0.0f;
+            }
         default:
             return 0.0f;
     }
@@ -250,7 +261,7 @@ SpellImplicitTargetInfo::StaticData  SpellImplicitTargetInfo::_data[TOTAL_SPELL_
     {TARGET_OBJECT_TYPE_DEST, TARGET_REFERENCE_TYPE_DEST,   TARGET_SELECT_CATEGORY_DEFAULT, TARGET_CHECK_ALLY,     TARGET_DIR_NONE},        // 29 TARGET_DEST_DYNOBJ_ALLY
     {TARGET_OBJECT_TYPE_UNIT, TARGET_REFERENCE_TYPE_SRC,    TARGET_SELECT_CATEGORY_AREA,    TARGET_CHECK_ALLY,     TARGET_DIR_NONE},        // 30 TARGET_UNIT_SRC_AREA_ALLY
     {TARGET_OBJECT_TYPE_UNIT, TARGET_REFERENCE_TYPE_DEST,   TARGET_SELECT_CATEGORY_AREA,    TARGET_CHECK_ALLY,     TARGET_DIR_NONE},        // 31 TARGET_UNIT_DEST_AREA_ALLY
-    {TARGET_OBJECT_TYPE_DEST, TARGET_REFERENCE_TYPE_CASTER, TARGET_SELECT_CATEGORY_DEFAULT, TARGET_CHECK_DEFAULT,  TARGET_DIR_FRONT_LEFT},  // 32 TARGET_DEST_CASTER_SUMMON
+    {TARGET_OBJECT_TYPE_DEST, TARGET_REFERENCE_TYPE_CASTER, TARGET_SELECT_CATEGORY_DEFAULT, TARGET_CHECK_DEFAULT,  TARGET_DIR_SUMMON },     // 32 TARGET_DEST_CASTER_SUMMON
     {TARGET_OBJECT_TYPE_UNIT, TARGET_REFERENCE_TYPE_SRC,    TARGET_SELECT_CATEGORY_AREA,    TARGET_CHECK_PARTY,    TARGET_DIR_NONE},        // 33 TARGET_UNIT_SRC_AREA_PARTY
     {TARGET_OBJECT_TYPE_UNIT, TARGET_REFERENCE_TYPE_DEST,   TARGET_SELECT_CATEGORY_AREA,    TARGET_CHECK_PARTY,    TARGET_DIR_NONE},        // 34 TARGET_UNIT_DEST_AREA_PARTY
     {TARGET_OBJECT_TYPE_UNIT, TARGET_REFERENCE_TYPE_TARGET, TARGET_SELECT_CATEGORY_DEFAULT, TARGET_CHECK_PARTY,    TARGET_DIR_NONE},        // 35 TARGET_UNIT_TARGET_PARTY
@@ -369,8 +380,8 @@ SpellEffectInfo::SpellEffectInfo(SpellEntry const* /*spellEntry*/, SpellInfo con
     Mechanic = Mechanics(_effect ? _effect->EffectMechanic : 0);
     TargetA = SpellImplicitTargetInfo(_effect ? _effect->EffectImplicitTargetA : 0);
     TargetB = SpellImplicitTargetInfo(_effect ? _effect->EffectImplicitTargetB : 0);
-    RadiusEntry = _effect && _effect->EffectRadiusIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusIndex) : nullptr;
-    MaxRadiusEntry = _effect && _effect->EffectRadiusMaxIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusMaxIndex) : nullptr;
+    TargetARadiusEntry = _effect && _effect->EffectRadiusIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusIndex) : nullptr;
+    TargetBRadiusEntry = _effect && _effect->EffectRadiusMaxIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusMaxIndex) : nullptr;
     ChainTarget = _effect ? _effect->EffectChainTargets : 0;
     ItemType = _effect ? _effect->EffectItemType : 0;
     TriggerSpell = _effect ? _effect->EffectTriggerSpell : 0;
@@ -389,7 +400,7 @@ bool SpellEffectInfo::IsEffect() const
 
 bool SpellEffectInfo::IsEffect(SpellEffects effectName) const
 {
-    return Effect == uint32(effectName);
+    return Effect == effectName;
 }
 
 bool SpellEffectInfo::IsAura() const
@@ -399,7 +410,7 @@ bool SpellEffectInfo::IsAura() const
 
 bool SpellEffectInfo::IsAura(AuraType aura) const
 {
-    return IsAura() && ApplyAuraName == uint32(aura);
+    return IsAura() && ApplyAuraName == aura;
 }
 
 bool SpellEffectInfo::IsTargetingArea() const
@@ -438,7 +449,7 @@ int32 SpellEffectInfo::CalcValue(WorldObject const* caster, int32 const* bp, Uni
     if (Scaling.Coefficient != 0.0f)
     {
         int32 level = _spellInfo->SpellLevel;
-        if (target && _spellInfo->IsPositiveEffect(_effIndex) && (Effect == SPELL_EFFECT_APPLY_AURA || Effect == SPELL_EFFECT_APPLY_AURA_2))
+        if (target && _spellInfo->HasAttribute(SPELL_ATTR8_USE_TARGETS_LEVEL_FOR_SPELL_SCALING))
             level = target->getLevel();
         else if (casterUnit)
             level = casterUnit->getLevel();
@@ -481,7 +492,12 @@ int32 SpellEffectInfo::CalcValue(WorldObject const* caster, int32 const* bp, Uni
     {
         if (casterUnit && basePointsPerLevel != 0.0f)
         {
-            int32 level = int32(casterUnit->getLevel());
+            int32 level = 1;
+            if (target && _spellInfo->HasAttribute(SPELL_ATTR8_USE_TARGETS_LEVEL_FOR_SPELL_SCALING))
+                level = target->getLevel();
+            else if (caster && caster->IsUnit())
+                level = casterUnit->getLevel();
+
             if (level > int32(_spellInfo->MaxLevel) && _spellInfo->MaxLevel > 0)
                 level = int32(_spellInfo->MaxLevel);
             else if (level < int32(_spellInfo->BaseLevel))
@@ -605,26 +621,46 @@ float SpellEffectInfo::CalcDamageMultiplier(WorldObject* caster, Spell* spell) c
     return multiplierPercent / 100.0f;
 }
 
-bool SpellEffectInfo::HasRadius() const
+bool SpellEffectInfo::HasRadius(SpellTargetIndex targetIndex) const
 {
-    return RadiusEntry != nullptr;
+    switch (targetIndex)
+    {
+        case SpellTargetIndex::TargetA:
+            return TargetARadiusEntry != nullptr;
+        case SpellTargetIndex::TargetB:
+            return TargetBRadiusEntry != nullptr;
+        default:
+            return false;
+    }
 }
 
-bool SpellEffectInfo::HasMaxRadius() const
+float SpellEffectInfo::CalcRadius(WorldObject* caster /*= nullptr*/, SpellTargetIndex targetIndex /*=SpellTargetIndex::TargetA*/, Spell* spell /*= nullptr*/) const
 {
-    return MaxRadiusEntry != nullptr;
-}
-
-float SpellEffectInfo::CalcRadius(WorldObject* caster, Spell* spell) const
-{
-    const SpellRadiusEntry* entry = RadiusEntry;
-    if (!HasRadius() && HasMaxRadius())
-        entry = MaxRadiusEntry;
+    // TargetA -> TargetARadiusEntry
+    // TargetB -> TargetBRadiusEntry
+    // Aura effects have TargetARadiusEntry == TargetBRadiusEntry (mostly)
+    SpellImplicitTargetInfo target = TargetA;
+    SpellRadiusEntry const* entry = TargetARadiusEntry;
+    if (targetIndex == SpellTargetIndex::TargetB && HasRadius(targetIndex))
+    {
+        target = TargetB;
+        entry = TargetBRadiusEntry;
+    }
 
     if (!entry)
         return 0.0f;
 
     float radius = entry->RadiusMin;
+
+    // Random targets use random value between RadiusMin and RadiusMax
+    // For other cases, client uses RadiusMax if RadiusMin is 0
+    if (target.GetTarget() == TARGET_DEST_CASTER_RANDOM ||
+        target.GetTarget() == TARGET_DEST_TARGET_RANDOM ||
+        target.GetTarget() == TARGET_DEST_DEST_RANDOM)
+        radius += (entry->RadiusMax - radius) * rand_norm();
+    else if (radius == 0.0f)
+        radius = entry->RadiusMax;
+
     if (caster)
     {
         if (Unit* casterUnit = caster->ToUnit())
@@ -949,7 +985,9 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     // SpellCastingRequirementsEntry
     SpellCastingRequirementsEntry const* _castreq = GetSpellCastingRequirements();
     RequiresSpellFocus = _castreq ? _castreq->RequiresSpellFocus : 0;
-    FacingCasterFlags = _castreq ? _castreq->FacingCasterFlags : 0;
+    FacingCasterFlags = _castreq ? SpellFacingCasterFlags(_castreq->FacingCasterFlags) : SpellFacingCasterFlags::None;
+    MinFactionId = _castreq ? _castreq->MinFactionID : 0;
+    MinReputation = _castreq ? _castreq->MinReputation : 0;
     AreaGroupId = _castreq ? _castreq->RequiredAreasID : -1;
 
     // SpellCategoriesEntry
@@ -1103,9 +1141,23 @@ bool SpellInfo::HasOnlyDamageEffects() const
     return true;
 }
 
+bool SpellInfo::HasTargetType(::Targets target) const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (!Effects[i].IsEffect())
+            continue;
+
+        if (Effects[i].TargetA.GetTarget() == target || Effects[i].TargetB.GetTarget() == target)
+            return true;
+    }
+
+    return false;
+}
+
 bool SpellInfo::CanBeInterrupted(Unit const* interruptTarget, bool ignoreImmunity /*= false*/) const
 {
-    return HasAttribute(SPELL_ATTR7_CAN_ALWAYS_BE_INTERRUPTED)
+    return HasAttribute(SPELL_ATTR7_NO_UI_NOT_INTERRUPTIBLE)
         || HasChannelInterruptFlag(SpellAuraInterruptFlags::Damage | SpellAuraInterruptFlags::EnteringCombat)
         || (interruptTarget->IsPlayer() && InterruptFlags.HasFlag(SpellInterruptFlags::DamageCancelsPlayerOnly))
         || ((!(interruptTarget->GetMechanicImmunityMask() & (1 << MECHANIC_INTERRUPT)) || ignoreImmunity)
@@ -1285,11 +1337,6 @@ bool SpellInfo::IsSelfCast() const
 bool SpellInfo::IsPassive() const
 {
     return HasAttribute(SPELL_ATTR0_PASSIVE);
-}
-
-bool SpellInfo::IsRaidMarker() const
-{
-    return AttributesEx8 & SPELL_ATTR8_RAID_MARKER;
 }
 
 bool SpellInfo::IsAutocastable() const
@@ -1699,8 +1746,9 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         while (groupEntry)
         {
             for (uint8 i = 0; i < MAX_GROUP_AREA_IDS; ++i)
-                if (groupEntry->AreaID[i] == zone_id || groupEntry->AreaID[i] == area_id)
+                if (DBCManager::IsInArea(area_id, groupEntry->AreaID[i]))
                     found = true;
+
             if (found || !groupEntry->NextAreaID)
                 break;
             // Try search in next group
@@ -1714,16 +1762,16 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
     // continent limitation (virtual continent)
     if (HasAttribute(SPELL_ATTR4_ONLY_FLYING_AREAS))
     {
-        uint32 mountFlags = 0;
+        EnumFlag<AreaMountFlags> mountFlags = AreaMountFlags::None;
         if (player && player->HasAuraType(SPELL_AURA_MOUNT_RESTRICTIONS))
         {
             for (AuraEffect const* auraEffect : player->GetAuraEffectsByType(SPELL_AURA_MOUNT_RESTRICTIONS))
-                mountFlags |= auraEffect->GetMiscValue();
+                mountFlags |= AreaMountFlags(auraEffect->GetMiscValue());
         }
         else if (AreaTableEntry const* areaTable = sAreaTableStore.LookupEntry(area_id))
-            mountFlags = areaTable->MountFlags;
+            mountFlags = areaTable->GetMountFlags();
 
-        if (!(mountFlags & AREA_MOUNT_FLAG_FLYING_ALLOWED))
+        if (!(mountFlags.HasFlag(AreaMountFlags::AllowFlyingMounts)))
             return SPELL_FAILED_INCORRECT_AREA;
     }
 
@@ -1733,6 +1781,20 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
         if (!mapEntry || mapEntry->IsRaid())
             return SPELL_FAILED_NOT_IN_RAID_INSTANCE;
+    }
+
+    if (HasAttribute(SPELL_ATTR8_REMOVE_OUTSIDE_DUNGEONS_AND_RAIDS))
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+        if (!mapEntry || !mapEntry->IsDungeon())
+            return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
+    }
+
+    if (HasAttribute(SPELL_ATTR8_NOT_IN_BATTLEGROUND))
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+        if (!mapEntry || mapEntry->IsBattleground())
+            return SPELL_FAILED_NOT_IN_BATTLEGROUND;
     }
 
     // DB base check (if non empty then must fit at least single for allow)
@@ -1854,6 +1916,13 @@ SpellCastResult SpellInfo::CheckTarget(WorldObject const* caster, WorldObject co
 
     Unit const* unitTarget = target->ToUnit();
 
+    /*
+    * @todo: 4.x - old hold due to an upcoming tempsummon rework
+    if (HasAttribute(SPELL_ATTR8_ONLY_TARGET_IF_SAME_CREATOR))
+        if (caster != target && caster->GetGUID() != target->GetOwnerGUID())
+            return SPELL_FAILED_BAD_TARGETS;
+    */
+
     // creature/player specific target checks
     if (unitTarget)
     {
@@ -1904,6 +1973,10 @@ SpellCastResult SpellInfo::CheckTarget(WorldObject const* caster, WorldObject co
                 }
             }
         }
+
+        if (HasAttribute(SPELL_ATTR8_ONLY_TARGET_OWN_SUMMONS))
+            if (!unitTarget->IsSummon() || unitTarget->ToTempSummon()->GetSummonerGUID() != caster->GetGUID())
+                return SPELL_FAILED_BAD_TARGETS;
     }
     // corpse specific target checks
     else if (Corpse const* corpseTarget = target->ToCorpse())
@@ -1941,9 +2014,8 @@ SpellCastResult SpellInfo::CheckTarget(WorldObject const* caster, WorldObject co
         return SPELL_FAILED_BAD_TARGETS;
 
     // Do not allow pet or guardian targets if the spell is a raid buff or may not target pets at all
-    if ((HasAttribute(SPELL_ATTR7_CONSOLIDATED_RAID_BUFF) || HasAttribute(SPELL_ATTR5_NOT_ON_PLAYER_CONTROLLED_NPC)) && (caster->IsCreature() && !caster->ToCreature()->IsPet() && !caster->ToCreature()->IsGuardian()))
-        if ((unitTarget->IsPet() || unitTarget->IsGuardian()))
-            return SPELL_FAILED_BAD_TARGETS;
+    if (HasAttribute(SPELL_ATTR5_NOT_ON_PLAYER_CONTROLLED_NPC) && unitTarget->IsCreature() && unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return SPELL_FAILED_BAD_TARGETS;
 
     // checked in Unit::IsValidAttack/AssistTarget, shouldn't be checked for ENTRY targets
     //if (!HasAttribute(SPELL_ATTR6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
@@ -3313,10 +3385,10 @@ uint32 SpellInfo::GetMechanicImmunityMask(Unit* caster) const
 
 float SpellInfo::CalculateScaledCoefficient(Unit const* caster, float coefficient) const
 {
-    if (coefficient == 0.f || !caster || !GetSpellScaling())
+    if (coefficient == 0.f || !caster || SpellScalingId == 0)
         return coefficient;
 
-    return coefficient *= GetSpellScalingMultiplier(caster, GetSpellScaling());
+    return coefficient *= GetSpellScalingMultiplier(caster);
 }
 
 float SpellInfo::GetMinRange(bool positive) const
@@ -3355,6 +3427,17 @@ int32 SpellInfo::GetMaxDuration() const
     if (!DurationEntry)
         return IsPassive() ? -1 : 0;
     return (DurationEntry->MaxDuration == -1) ? -1 : abs(DurationEntry->MaxDuration);
+}
+
+float SpellInfo::CalcPeriodicHasteMod(Unit const* caster) const
+{
+    float hasteMod = 1.f;
+    if (HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC))
+        hasteMod = caster->GetFloatValue(UNIT_MOD_CAST_HASTE);
+    else if (HasAttribute(SPELL_ATTR8_MELEE_HASTE_AFFECTS_PERIODIC) && caster->IsPlayer())
+        hasteMod = caster->GetFloatValue(PLAYER_FIELD_MOD_HASTE);
+
+    return hasteMod;
 }
 
 int32 SpellInfo::CalcDuration(WorldObject const* caster /*= nullptr*/) const
@@ -3410,13 +3493,14 @@ int32 SpellInfo::CalcDuration(WorldObject const* caster /*= nullptr*/) const
             return false;
         }();
 
-        if (hasPeriodicEffect && HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC) && !HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS))
+        if (hasPeriodicEffect && !HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) && (HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC) || HasAttribute(SPELL_ATTR8_MELEE_HASTE_AFFECTS_PERIODIC)))
         {
-            float hasteMod = unitCaster->GetFloatValue(UNIT_MOD_CAST_HASTE);
+            float hasteMod = CalcPeriodicHasteMod(unitCaster);
             if (hasteMod > 0.001f)
             {
                 if (HasAttribute(SPELL_ATTR8_HASTE_AFFECTS_DURATION))
                     return int32(duration * hasteMod);
+
                 int32 period = CalcPeriod(caster, periodicEffectIndex);
                 if (period > 0)
                     duration = int32(period * (duration / (float)period));
@@ -3447,9 +3531,9 @@ int32 SpellInfo::CalcPeriod(WorldObject const* caster, SpellEffIndex effIndex, O
     if (Player const* modOwner = unitCaster->GetSpellModOwner())
         modOwner->ApplySpellMod(Id, SpellModOp::Period, period);
 
-    if (HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC) && !HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS))
+    if (!HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) && (HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC) || HasAttribute(SPELL_ATTR8_MELEE_HASTE_AFFECTS_PERIODIC)))
     {
-        float hasteMod = unitCaster->GetFloatValue(UNIT_MOD_CAST_HASTE);
+        float hasteMod = CalcPeriodicHasteMod(unitCaster);
         if (hasteMod > 0.001f)
             period = ((float)period * hasteMod);
     }
@@ -3600,7 +3684,7 @@ int32 SpellInfo::CalcPowerCost(WorldObject const* caster, SpellSchoolMask school
 
         // Scaling
         if (SpellScalingId)
-            powerCost = int32(ceilf(GetSpellScalingMultiplier(unitCaster, GetSpellScaling(), true) * (double)powerCost));
+            powerCost = int32(ceilf(GetSpellScalingMultiplier(unitCaster, true) * (double)powerCost));
         else
         {
             uint32 manaCostPerLevel = invertSign ? -int32(ManaCostPerlevel) : ManaCostPerlevel;
@@ -3670,30 +3754,27 @@ int32 SpellInfo::CalcPowerCost(WorldObject const* caster, SpellSchoolMask school
     return powerCost;
 }
 
-float SpellInfo::GetSpellScalingMultiplier(WorldObject const* caster, SpellScalingEntry const* scalingEntry, bool isPowerCostRelated /*= false*/) const
+float SpellInfo::GetSpellScalingMultiplier(WorldObject const* caster, bool isPowerCostRelated /*= false*/) const
 {
-    if (!caster || !caster->IsUnit() || !scalingEntry)
+    if (!caster || !caster->IsUnit() || SpellScalingId == 0)
         return 1.f;
 
     float multiplier = 1.f;
     float scalingMultiplier = 1.f;
 
-    int32 castTimeMaxLevel = scalingEntry->CastTimeMaxLevel;
     uint8 casterLevel = caster->ToUnit()->getLevel();
 
-    if (casterLevel < castTimeMaxLevel && scalingEntry->CastTimeMax)
+    if (casterLevel < Scaling.CastTimeMaxLevel && Scaling.CastTimeMax)
     {
-        float castTimeMax = (float)scalingEntry->CastTimeMax;
-        int32 castTime = scalingEntry->CastTimeMin + ((casterLevel - 1) * (scalingEntry->CastTimeMax - scalingEntry->CastTimeMin)) / (castTimeMaxLevel - 1);
-        multiplier = castTime / castTimeMax;
-        scalingMultiplier = castTime / castTimeMax;
+        int32 castTime = Scaling.CastTimeMin + ((casterLevel - 1) * (Scaling.CastTimeMax - Scaling.CastTimeMin)) / (Scaling.CastTimeMaxLevel - 1);
+        multiplier = castTime / (float)Scaling.CastTimeMax;
+        scalingMultiplier = castTime / (float)Scaling.CastTimeMax;
     }
 
     if (!isPowerCostRelated)
     {
-        int32 nerfMaxLevel = scalingEntry->NerfMaxLevel;
-        if (casterLevel < nerfMaxLevel)
-            scalingMultiplier = ((((1.f - scalingEntry->NerfFactor) * (casterLevel - 1)) / (nerfMaxLevel - 1)) + scalingEntry->NerfFactor) * multiplier;
+        if (casterLevel < Scaling.NerfMaxLevel)
+            scalingMultiplier = ((((1.f - Scaling.NerfFactor) * (casterLevel - 1)) / (Scaling.NerfMaxLevel - 1)) + Scaling.NerfFactor) * multiplier;
     }
 
     return scalingMultiplier;

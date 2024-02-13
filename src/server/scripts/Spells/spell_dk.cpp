@@ -33,6 +33,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+namespace Spells::DeathKnight
+{
 enum DeathKnightSpells
 {
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT            = 51052,
@@ -108,6 +110,11 @@ enum DKSpellIcons
     DK_ICON_ID_IMPROVED_UNHOLY_PRESENCE         = 2633,
     DK_ICON_ID_IMPROVED_FROST_PRESENCE          = 2632,
     DK_ICON_ID_BLOOD_SHIELD_MASTERY             = 2624
+};
+
+enum MiscSpells
+{
+    SPELL_GEN_INTERRUPT                         = 32747
 };
 
 // 48707 - Anti-Magic Shell
@@ -703,7 +710,7 @@ class spell_dk_pestilence : public SpellScript
                 float donePct = aurOld->GetDonePct();
                 float critChance = aurOld->GetCritChance();
 
-                if (AuraEffect* aurEffOld = aurOld->GetEffect(EFFECT_0))
+                if (aurOld->GetEffect(EFFECT_0))
                 {
                     caster->CastSpell(hitUnit, SPELL_DK_BLOOD_PLAGUE, true); // Spread the disease to hitUnit.
 
@@ -720,7 +727,7 @@ class spell_dk_pestilence : public SpellScript
                 {
                     float donePct = aurOld->GetDonePct();
 
-                    if (AuraEffect* aurEffOld = aurOld->GetEffect(EFFECT_0))
+                    if (aurOld->GetEffect(EFFECT_0))
                     {
                         caster->CastSpell(hitUnit, SPELL_DK_FROST_FEVER, true); // Spread the disease to hitUnit.
 
@@ -1843,8 +1850,34 @@ class spell_dk_dark_simulacrum : public AuraScript
     }
 };
 
+// 47476 - Strangulate
+class spell_dk_strangulate : public SpellScript
+{
+    bool Validate(SpellInfo const* /*spellInfi*/) override
+    {
+        return ValidateSpellInfo({ SPELL_GEN_INTERRUPT });
+    }
+
+    void HandleCreatureInterrupt(SpellEffIndex /*effIndex*/)
+    {
+        Creature* target = GetHitCreature();
+        if (!target)
+            return;
+
+        if (Unit* caster = GetCaster())
+            caster->CastSpell(target, SPELL_GEN_INTERRUPT, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget.Register(&spell_dk_strangulate::HandleCreatureInterrupt, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+    }
+};
+}
+
 void AddSC_deathknight_spell_scripts()
 {
+    using namespace Spells::DeathKnight;
     RegisterSpellScript(spell_dk_anti_magic_shell);
     RegisterSpellScript(spell_dk_anti_magic_zone);
     RegisterSpellScript(spell_dk_army_of_the_dead);
@@ -1891,6 +1924,7 @@ void AddSC_deathknight_spell_scripts()
     RegisterSpellScript(spell_dk_shadow_infusion);
     RegisterSpellScript(spell_dk_scourge_strike);
     RegisterSpellScript(spell_dk_smoldering_rune);
+    RegisterSpellScript(spell_dk_strangulate);
     RegisterSpellScript(spell_dk_threat_of_thassarian);
     RegisterSpellScript(spell_dk_unoly_blight);
     RegisterSpellScript(spell_dk_unholy_command);

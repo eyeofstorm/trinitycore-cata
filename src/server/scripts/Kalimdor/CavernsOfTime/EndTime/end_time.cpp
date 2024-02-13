@@ -25,6 +25,8 @@
 #include "ScriptedGossip.h"
 #include "ScriptMgr.h"
 
+namespace EndTime
+{
 enum Events
 {
     // Nozdormu
@@ -199,10 +201,10 @@ struct go_end_time_time_transit_device : public GameObjectAI
             return false;
 
         if (player->GetAreaId() != AREA_ID_ENTRYWAY_OF_TIME)
-            AddGossipItemFor(player, GOSSIP_MENU_ID_SELECT_YOUR_DESTINATION, GOSSIP_INDEX_TELEPORT_TO_ENTRYWAY_OF_TIME, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + GOSSIP_INDEX_TELEPORT_TO_ENTRYWAY_OF_TIME);
+            AddGossipItemFor(player, GOSSIP_MENU_ID_SELECT_YOUR_DESTINATION, GOSSIP_INDEX_TELEPORT_TO_ENTRYWAY_OF_TIME, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + AsUnderlyingType(GOSSIP_INDEX_TELEPORT_TO_ENTRYWAY_OF_TIME));
 
         // @todo: world state based menu generation
-        AddGossipItemFor(player, GOSSIP_MENU_ID_SELECT_YOUR_DESTINATION, GOSSIP_INDEX_TELEPORT_TO_BLUE_DRAGONSHRINE_FIRST_ECHO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + GOSSIP_INDEX_TELEPORT_TO_BLUE_DRAGONSHRINE_FIRST_ECHO);
+        AddGossipItemFor(player, GOSSIP_MENU_ID_SELECT_YOUR_DESTINATION, GOSSIP_INDEX_TELEPORT_TO_BLUE_DRAGONSHRINE_FIRST_ECHO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + AsUnderlyingType(GOSSIP_INDEX_TELEPORT_TO_BLUE_DRAGONSHRINE_FIRST_ECHO));
 
         SendGossipMenuFor(player, player->GetGossipTextId(GOSSIP_MENU_ID_SELECT_YOUR_DESTINATION, me), me->GetGUID());
 
@@ -245,9 +247,11 @@ struct go_end_time_fragment_of_jainas_staff : public GameObjectAI
 private:
     InstanceScript* _instance;
 };
+}
 
 void AddSC_end_time()
 {
+    using namespace EndTime;
     RegisterEndTimeCreatureAI(npc_end_time_nozdormu);
     RegisterGameObjectAI(go_end_time_time_transit_device);
     RegisterGameObjectAI(go_end_time_fragment_of_jainas_staff);

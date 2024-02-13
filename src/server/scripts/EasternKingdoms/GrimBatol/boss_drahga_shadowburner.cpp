@@ -21,13 +21,14 @@
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
-#include "MoveSplineInit.h"
 #include "Player.h"
 #include "MotionMaster.h"
 #include "InstanceScript.h"
 #include "TemporarySummon.h"
 #include "grim_batol.h"
 
+namespace GrimBatol::DrahgaShadowburner
+{
 enum Spells
 {
     // Drahga
@@ -490,7 +491,7 @@ struct npc_drahga_invoked_flaming_spirit : public ScriptedAI
                         AddThreat(target, 1500000.0f); // Todo: this should be handled by serverside spell 95207
                         me->GetThreatManager().FixateTarget(target);
                         me->ClearUnitState(UNIT_STATE_CASTING);
-                        me->GetMotionMaster()->MoveChase(target, 0.f, 0.f);
+                        me->GetMotionMaster()->MoveChase(target);
                     }
                     break;
                 default:
@@ -540,9 +541,12 @@ class spell_drahga_devouring_flames : public SpellScript
         OnHit.Register(&spell_drahga_devouring_flames::ChangeDamage);
     }
 };
+}
 
 void AddSC_boss_drahga_shadowburner()
 {
+    using namespace GrimBatol;
+    using namespace GrimBatol::DrahgaShadowburner;
     RegisterGrimBatolCreatureAI(boss_drahga_shadowburner);
     RegisterGrimBatolCreatureAI(npc_drahga_valiona);
     RegisterGrimBatolCreatureAI(npc_drahga_invoked_flaming_spirit);

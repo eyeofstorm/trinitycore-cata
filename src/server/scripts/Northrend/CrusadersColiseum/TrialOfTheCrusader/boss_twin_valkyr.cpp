@@ -32,6 +32,8 @@
 #include "SpellScript.h"
 #include "trial_of_the_crusader.h"
 
+namespace TrialOfTheCrusader::TwinValkyr
+{
 enum Texts
 {
     SAY_AGGRO               = 0,
@@ -370,8 +372,6 @@ class boss_fjola : public CreatureScript
                 TwinPactSpellId = SPELL_LIGHT_TWIN_PACT;
                 TouchSpellId = SPELL_LIGHT_TOUCH;
                 SpikeSpellId = SPELL_LIGHT_TWIN_SPIKE;
-
-                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
                 boss_twin_baseAI::Reset();
             }
 
@@ -410,7 +410,7 @@ class boss_fjola : public CreatureScript
 
             void JustEngagedWith(Unit* who) override
             {
-                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
+                instance->TriggerGameEvent(EVENT_START_TWINS_FIGHT);
                 events.ScheduleEvent(EVENT_SPECIAL_ABILITY, 45 * IN_MILLISECONDS);
                 me->SummonCreature(NPC_BULLET_CONTROLLER, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
                 boss_twin_baseAI::JustEngagedWith(who);
@@ -539,7 +539,7 @@ struct npc_unleashed_ballAI : public ScriptedAI
 
     void Initialize()
     {
-        RangeCheckTimer = 0.5*IN_MILLISECONDS;
+        RangeCheckTimer = 0.5* AsUnderlyingType(IN_MILLISECONDS);
     }
 
     void MoveToNextPoint()
@@ -608,7 +608,7 @@ class npc_unleashed_dark : public CreatureScript
                         me->GetMotionMaster()->MoveIdle();
                         me->DespawnOrUnsummon(1*IN_MILLISECONDS);
                     }
-                    RangeCheckTimer = 0.5*IN_MILLISECONDS;
+                    RangeCheckTimer = 0.5* AsUnderlyingType(IN_MILLISECONDS);
                 }
                 else
                     RangeCheckTimer -= diff;
@@ -640,7 +640,7 @@ class npc_unleashed_light : public CreatureScript
                         me->GetMotionMaster()->MoveIdle();
                         me->DespawnOrUnsummon(1*IN_MILLISECONDS);
                     }
-                    RangeCheckTimer = 0.5*IN_MILLISECONDS;
+                    RangeCheckTimer = 0.5* AsUnderlyingType(IN_MILLISECONDS);
                 }
                 else
                     RangeCheckTimer -= diff;
@@ -871,9 +871,12 @@ class spell_power_of_the_twins : public SpellScriptLoader
             return new spell_power_of_the_twins_AuraScript();
         }
 };
+}
 
 void AddSC_boss_twin_valkyr()
 {
+    using namespace TrialOfTheCrusader;
+    using namespace TrialOfTheCrusader::TwinValkyr;
     new boss_fjola();
     new boss_eydis();
     new npc_unleashed_light();

@@ -25,6 +25,8 @@
 #include "ulduar.h"
 #include "Vehicle.h"
 
+namespace Ulduar::Ignis
+{
 enum Yells
 {
     SAY_AGGRO       = 0,
@@ -137,8 +139,6 @@ class boss_ignis : public CreatureScript
                 _Reset();
                 if (Vehicle* _vehicle = me->GetVehicleKit())
                     _vehicle->RemoveAllPassengers();
-
-                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_IGNIS_START_EVENT);
             }
 
             void JustEngagedWith(Unit* who) override
@@ -152,7 +152,7 @@ class boss_ignis : public CreatureScript
                 events.ScheduleEvent(EVENT_END_POT, 40000);
                 events.ScheduleEvent(EVENT_BERSERK, 480000);
                 Initialize();
-                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_IGNIS_START_EVENT);
+                instance->TriggerGameEvent(ACHIEVEMENT_IGNIS_START_EVENT);
             }
 
             void JustDied(Unit* /*killer*/) override
@@ -499,9 +499,12 @@ class achievement_ignis_shattered : public AchievementCriteriaScript
             return false;
         }
 };
+}
 
 void AddSC_boss_ignis()
 {
+    using namespace Ulduar;
+    using namespace Ulduar::Ignis;
     new boss_ignis();
     new npc_iron_construct();
     new npc_scorch_ground();

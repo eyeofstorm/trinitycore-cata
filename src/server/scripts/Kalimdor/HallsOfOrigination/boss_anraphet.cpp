@@ -23,10 +23,11 @@
 #include "MotionMaster.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
 
+namespace HallsOfOrigination::Anraphet
+{
 enum Texts
 {
     ANRAPHET_SAY_INTRO              = 0,
@@ -369,32 +370,12 @@ class spell_anraphet_omega_stance_summon : public SpellScript
         OnEffectLaunch.Register(&spell_anraphet_omega_stance_summon::SetDestPosition, EFFECT_0, SPELL_EFFECT_SUMMON);
     }
 };
-
-// 77127 Omega Stance Spider Effect
-class spell_anraphet_omega_stance_spider_effect : public SpellScript
-{
-    void SetDestPosition(SpellEffIndex /*effIndex*/)
-    {
-        Unit* caster = GetCaster();
-        float angle = float(rand_norm()) * static_cast<float>(2 * M_PI);
-        uint32 dist = caster->GetCombatReach() + GetSpellInfo()->Effects[EFFECT_0].CalcRadius(caster) * (float)rand_norm();
-
-        float x = caster->GetPositionX() + dist * std::cos(angle);
-        float y = caster->GetPositionY() + dist * std::sin(angle);
-        float z = caster->GetMap()->GetHeight(caster->GetPhaseShift(), x, y, caster->GetPositionZ());
-        float o = GetHitDest()->GetOrientation();
-
-        GetHitDest()->Relocate({ x, y, z, o });
-    }
-
-    void Register()
-    {
-        OnEffectLaunch.Register(&spell_anraphet_omega_stance_spider_effect::SetDestPosition, EFFECT_0, SPELL_EFFECT_DUMMY);
-    }
-};
+}
 
 void AddSC_boss_anraphet()
 {
+    using namespace HallsOfOrigination;
+    using namespace HallsOfOrigination::Anraphet;
     RegisterHallsOfOriginationCreatureAI(boss_anraphet);
     RegisterHallsOfOriginationCreatureAI(npc_alpha_beam);
     RegisterHallsOfOriginationCreatureAI(npc_omega_stance);
@@ -402,5 +383,4 @@ void AddSC_boss_anraphet()
     RegisterSpellScript(spell_anraphet_alpha_beams);
     RegisterSpellScript(spell_anraphet_omega_stance);
     RegisterSpellScript(spell_anraphet_omega_stance_summon);
-    RegisterSpellScript(spell_anraphet_omega_stance_spider_effect);
 }

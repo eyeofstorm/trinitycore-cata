@@ -13,7 +13,7 @@ CollectSourceFiles(
   PRIVATE_SOURCES
 )
 
-if (WIN32)
+if(WIN32)
   list(APPEND PRIVATE_SOURCES ${sources_windows})
 endif()
 
@@ -44,8 +44,17 @@ set_target_properties(mapextractor
     FOLDER
       "tools")
 
-if( UNIX )
+if(UNITY_BUILDS)
+  set_target_properties(mapextractor
+      PROPERTIES UNITY_BUILD ON)
+  set_target_properties(mapextractor
+      PROPERTIES
+        UNITY_BUILD_MODE BATCH
+        UNITY_BUILD_BATCH_SIZE 6)
+endif()
+
+if(UNIX)
   install(TARGETS mapextractor DESTINATION bin)
-elseif( WIN32 )
+elseif(WIN32)
   install(TARGETS mapextractor DESTINATION "${CMAKE_INSTALL_PREFIX}")
 endif()

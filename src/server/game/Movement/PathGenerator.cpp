@@ -23,6 +23,7 @@
 #include "MMapFactory.h"
 #include "MMapManager.h"
 #include "Log.h"
+#include "Position.h"
 #include "DisableMgr.h"
 #include "DetourCommon.h"
 #include "DetourNavMeshQuery.h"
@@ -44,8 +45,8 @@ PathGenerator::PathGenerator(WorldObject const* owner) :
     if (DisableMgr::IsPathfindingEnabled(mapId))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-        _navMesh = mmap->GetNavMesh(mapId);
-        _navMeshQuery = mmap->GetNavMeshQuery(mapId, _source->GetInstanceId());
+        _navMeshQuery = mmap->GetNavMeshQuery(mapId, _source->GetMapId(), _source->GetInstanceId());
+        _navMesh = _navMeshQuery ? _navMeshQuery->getAttachedNavMesh() : mmap->GetNavMesh(mapId);
     }
 
     CreateFilter();
@@ -59,6 +60,16 @@ PathGenerator::~PathGenerator()
 bool PathGenerator::CalculatePath(float destX, float destY, float destZ, bool forceDest /*= false*/)
 {
     return CalculatePath(PositionToVector3(_source->GetPosition()), G3D::Vector3(destX, destY, destZ), forceDest);
+}
+
+bool PathGenerator::CalculatePath(Position const& destination, bool forceDest /*= false*/)
+{
+    return CalculatePath(PositionToVector3(_source->GetPosition()), PositionToVector3(destination), forceDest);
+}
+
+bool PathGenerator::CalculatePath(Position const& startPosition, Position const& destination, bool forceDest /*= false*/)
+{
+    return CalculatePath(PositionToVector3(startPosition), PositionToVector3(destination), forceDest);
 }
 
 bool PathGenerator::CalculatePath(G3D::Vector3 const& startPoint, G3D::Vector3 const& endPoint, bool forceDest /*= false*/)
@@ -211,8 +222,13 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
     }
 
     // we may need a better number here
-    bool startFarFromPoly = distToStartPoly > 7.0f;
-    bool endFarFromPoly = distToEndPoly > 7.0f;
+    float allowedPolyDist = 7.0f;
+    if (Unit const* unit = _source->ToUnit())
+        if (unit->IsHovering()) // some hovering units hover above the original 7.0f threshold so we have to take their hover offset into consideration
+            allowedPolyDist = std::max(allowedPolyDist, unit->GetHoverOffset());
+
+    bool startFarFromPoly = distToStartPoly > allowedPolyDist;
+    bool endFarFromPoly = distToEndPoly > allowedPolyDist;
     if (startFarFromPoly || endFarFromPoly)
     {
         TC_LOG_DEBUG("maps.mmaps", "++ BuildPolyPath :: farFromPoly distToStartPoly=%.3f distToEndPoly=%.3f", distToStartPoly, distToEndPoly);
@@ -675,6 +691,9 @@ void PathGenerator::CreateFilter()
 
 void PathGenerator::UpdateFilter()
 {
+    _filter.setIncludeFlags(_filter.getIncludeFlags() | _source->GetMap()->GetForceEnabledNavMeshFilterFlags());
+    _filter.setExcludeFlags(_filter.getExcludeFlags() | _source->GetMap()->GetForceDisabledNavMeshFilterFlags());
+
     // allow creatures to cheat and use different movement types if they are moved
     // forcefully into terrain they can't normally move in
     if (const Unit* _sourceUnit = _source->ToUnit())

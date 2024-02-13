@@ -22,13 +22,13 @@
 
 #include "ScriptMgr.h"
 #include "CellImpl.h"
-#include "CombatAI.h"
 #include "GridNotifiersImpl.h"
 #include "MotionMaster.h"
-#include "PetAI.h"
 #include "ScriptedCreature.h"
 #include "TemporarySummon.h"
 
+namespace Pets::Mage
+{
 enum Spells
 {
     SPELL_INHERIT_MASTERS_THREAT_LIST   = 58838,
@@ -138,8 +138,10 @@ private:
     EventMap _events;
     float _angle;
 };
+}
 
 void AddSC_mage_pet_scripts()
 {
+    using namespace Pets::Mage;
     RegisterCreatureAI(npc_pet_mage_mirror_image);
 }

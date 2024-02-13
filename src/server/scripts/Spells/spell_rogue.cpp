@@ -25,7 +25,6 @@
 #include "Containers.h"
 #include "DBCStores.h"
 #include "Item.h"
-#include "Log.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "SpellAuraEffects.h"
@@ -33,6 +32,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+namespace Spells::Rogue
+{
 enum RogueSpells
 {
     SPELL_ROGUE_ADRENALIN_RUSH                      = 13750,
@@ -1014,8 +1015,13 @@ class spell_rog_deadly_momentum : public AuraScript
 
         // Recuperate duration refreshing
         if (AuraEffect* recuperate = target->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_ROGUE, 0, 0x08000000, 0))
+        {
             if (spell_rog_recuperate* script = recuperate->GetBase()->GetScript<spell_rog_recuperate>("spell_rog_recuperate"))
+            {
                 recuperate->GetBase()->SetDuration(script->Duration);
+                recuperate->ResetTicks();
+            }
+        }
     }
 
     void Register() override
@@ -1377,9 +1383,11 @@ class spell_rogue_venomous_wounds : public AuraScript
         AfterEffectProc.Register(&spell_rogue_venomous_wounds::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
+}
 
 void AddSC_rogue_spell_scripts()
 {
+    using namespace Spells::Rogue;
     RegisterSpellScript(spell_rog_bandits_guile);
     RegisterSpellScript(spell_rog_blade_flurry);
     RegisterSpellScript(spell_rog_cheat_death);

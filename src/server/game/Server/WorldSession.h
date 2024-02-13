@@ -196,6 +196,7 @@ namespace WorldPackets
         class SetEveryoneIsAssistant;
         class PartyInviteClient;
         class PartyInviteResponse;
+        class SetRole;
     }
 
     namespace Quest
@@ -221,6 +222,11 @@ namespace WorldPackets
         class DBQueryBulk;
     }
 
+    namespace Reforge
+    {
+        class ReforgeItem;
+    }
+
     namespace Spells
     {
         class CastSpell;
@@ -232,6 +238,9 @@ namespace WorldPackets
     namespace Ticket
     {
         class Complaint;
+        class SupportTicketSubmitSuggestion;
+        class SupportTicketSubmitBug;
+        class SupportTicketSubmitComplaint;
     }
 
     namespace Totem
@@ -810,7 +819,7 @@ class TC_GAME_API WorldSession
         void HandleGroupUninviteOpcode(WorldPacket& recvPacket);
         void HandleGroupUninviteGuidOpcode(WorldPacket& recvPacket);
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
-        void HandleGroupSetRolesOpcode(WorldPacket& recvData);
+        void HandleSetRoleOpcode(WorldPackets::Party::SetRole& packet);
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
         void HandleOptOutOfLootOpcode(WorldPacket& recvData);
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
@@ -1165,6 +1174,9 @@ class TC_GAME_API WorldSession
         void HandleCancelMountAuraOpcode(WorldPacket& recvData);
         void HandleSelfResOpcode(WorldPacket& recvData);
         void HandleComplaintOpcode(WorldPackets::Ticket::Complaint& packet);
+        void HandleSupportTicketSubmitSuggestionOpcode(WorldPackets::Ticket::SupportTicketSubmitSuggestion& packet);
+        void HandleSupportTicketSubmitBugOpcode(WorldPackets::Ticket::SupportTicketSubmitBug& packet);
+        void HandleSupportTicketSubmitComplaintOpcode(WorldPackets::Ticket::SupportTicketSubmitComplaint& packet);
         void HandleRequestPetInfoOpcode(WorldPacket& recvData);
 
         // Socket gem
@@ -1231,7 +1243,7 @@ class TC_GAME_API WorldSession
         void HandleTransmogrifyItems(WorldPackets::Item::TransmogrifyItems& packet);
 
         // Reforge
-        void HandleReforgeItemOpcode(WorldPacket& recvData);
+        void HandleReforgeItemOpcode(WorldPackets::Reforge::ReforgeItem& packet);
         void SendReforgeResult(bool success);
 
         // Miscellaneous

@@ -25,6 +25,8 @@
 #include "TemporarySummon.h"
 #include "vortex_pinnacle.h"
 
+namespace VortexPinnacle
+{
 #define MAX_ENCOUNTER 3
 
 /* The Vortex Pinnacle encounters:
@@ -129,7 +131,7 @@ class instance_vortex_pinnacle : public InstanceMapScript
                 switch (creature->GetEntry())
                 {
                     case NPC_HOWLING_GALE:
-                        creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid2);
+                        creature->SetDisplayFromModel(1);
                         break;
                     case NPC_AIR_CURRENT:
                         _airCurrentGUIDs.push_back(creature->GetGUID());
@@ -163,7 +165,7 @@ class instance_vortex_pinnacle : public InstanceMapScript
                         }
                         break;
                     case NPC_GOLDEN_ORB:
-                        creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid2);
+                        creature->SetDisplayFromModel(1);
                         break;
                     default:
                         break;
@@ -266,8 +268,10 @@ class instance_vortex_pinnacle : public InstanceMapScript
             return new instance_vortex_pinnacle_InstanceScript(map);
         }
 };
+}
 
 void AddSC_instance_vortex_pinnacle()
 {
+    using namespace VortexPinnacle;
     new instance_vortex_pinnacle();
 }

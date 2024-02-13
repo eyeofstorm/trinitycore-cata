@@ -24,12 +24,13 @@
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
-#include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include "InstanceScript.h"
 
+namespace BlackrockCaverns
+{
 /*#####
 # npc_fire_cyclone
 #####*/
@@ -869,9 +870,11 @@ public:
 private:
     uint32 _questId = 0;
 };
+}
 
 void AddSC_blackrock_caverns()
 {
+    using namespace BlackrockCaverns;
     RegisterBlackrockCavernsCreatureAI(npc_fire_cyclone);
     RegisterBlackrockCavernsCreatureAI(npc_twilight_flame_caller);
     RegisterBlackrockCavernsCreatureAI(npc_twilight_torturer);

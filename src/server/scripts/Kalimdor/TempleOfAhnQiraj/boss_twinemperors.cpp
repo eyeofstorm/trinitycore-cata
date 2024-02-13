@@ -30,6 +30,8 @@ EndScriptData */
 #include "SpellInfo.h"
 #include "temple_of_ahnqiraj.h"
 
+namespace TempleOfAhnqiraj::TwinEmperors
+{
 enum Spells
 {
     SPELL_HEAL_BROTHER            = 7393,
@@ -299,8 +301,8 @@ struct boss_twinemperorsAI : public BossAI
         if (me->CanCreatureAttack(who))
         {
             float attackRadius = me->GetAttackDistance(who);
-            if (attackRadius < PULL_RANGE)
-                attackRadius = PULL_RANGE;
+            if (attackRadius < float(PULL_RANGE))
+                attackRadius = float(PULL_RANGE);
             if (me->IsWithinDistInMap(who, attackRadius) && me->GetDistanceZ(who) <= /*CREATURE_Z_ATTACK_RANGE*/7 /*there are stairs*/)
             {
                 //if (who->HasStealthAura())
@@ -594,9 +596,12 @@ public:
         return GetAQ40AI<boss_veklorAI>(creature);
     }
 };
+}
 
 void AddSC_boss_twinemperors()
 {
+    using namespace TempleOfAhnqiraj;
+    using namespace TempleOfAhnqiraj::TwinEmperors;
     new boss_veknilash();
     new boss_veklor();
 }

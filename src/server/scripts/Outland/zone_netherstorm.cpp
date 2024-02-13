@@ -36,8 +36,9 @@ EndContentData */
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptedEscortAI.h"
-#include "ScriptedGossip.h"
 
+namespace Netherstorm
+{
 /*######
 ## npc_commander_dawnforge
 ######*/
@@ -698,9 +699,11 @@ class go_captain_tyralius_prison : public GameObjectScript
             return new go_captain_tyralius_prisonAI(go);
         }
 };
+}
 
 void AddSC_netherstorm()
 {
+    using namespace Netherstorm;
     new npc_commander_dawnforge();
     new at_commander_dawnforge();
     new npc_phase_hunter();

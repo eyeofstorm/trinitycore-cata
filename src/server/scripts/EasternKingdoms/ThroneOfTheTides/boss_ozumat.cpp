@@ -33,6 +33,8 @@
 #include "ObjectAccessor.h"
 #include "Map.h"
 
+namespace ThroneOfTheTides::Ozumat
+{
 enum Texts
 {
     // Neptulon
@@ -143,7 +145,7 @@ enum MovePoints
     POINT_NONE = 0
 };
 
-enum GossipMenu
+enum GossipMenuOptions
 {
     GOSSIP_OPTION_START_ENCOUNTER = 0
 };
@@ -896,9 +898,12 @@ class spell_ozumat_purify : public SpellScript
         OnObjectAreaTargetSelect.Register(&spell_ozumat_purify::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
     }
 };
+}
 
 void AddSC_boss_ozumat()
 {
+    using namespace ThroneOfTheTides;
+    using namespace ThroneOfTheTides::Ozumat;
     RegisterThroneOfTheTidesCreatureAI(boss_ozumat);
     RegisterThroneOfTheTidesCreatureAI(npc_ozumat_neptulon);
     RegisterThroneOfTheTidesCreatureAI(npc_ozumat_vicious_mindlasher);

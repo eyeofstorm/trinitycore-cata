@@ -32,6 +32,8 @@
 #include "TemporarySummon.h"
 #include "ulduar.h"
 
+namespace Ulduar::Razorscale
+{
 enum Says
 {
     // Expedition Commander
@@ -197,7 +199,7 @@ class boss_razorscale_controller : public CreatureScript
             boss_razorscale_controllerAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
                 instance = creature->GetInstanceScript();
-                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+                me->SetDisplayFromModel(1);
             }
 
             InstanceScript* instance;
@@ -1175,9 +1177,12 @@ class achievement_quick_shave : public AchievementCriteriaScript
             return false;
         }
 };
+}
 
 void AddSC_boss_razorscale()
 {
+    using namespace Ulduar;
+    using namespace Ulduar::Razorscale;
     new boss_razorscale_controller();
     new go_razorscale_harpoon();
     new boss_razorscale();

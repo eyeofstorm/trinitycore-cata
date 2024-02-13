@@ -20,13 +20,15 @@
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "Spell.h"
+#include "SpellScript.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "Player.h"
 #include "InstanceScript.h"
 #include "ObjectAccessor.h"
 
+namespace ShadowfangKeep::LordGodfrey
+{
 enum Texts
 {
     SAY_AGGRO_ALLIANCE              = 0,
@@ -352,9 +354,12 @@ class spell_godfrey_cursed_bullets : public AuraScript
 private:
     uint32 _baseDamage = 0;
 };
+}
 
 void AddSC_boss_lord_godfrey()
 {
+    using namespace ShadowfangKeep;
+    using namespace ShadowfangKeep::LordGodfrey;
     RegisterShadowfangKeepCreatureAI(boss_lord_godfrey);
     RegisterSpellScript(spell_godfrey_summon_bloodthirsty_ghouls);
     RegisterSpellScript(spell_godfrey_pistol_barrage);

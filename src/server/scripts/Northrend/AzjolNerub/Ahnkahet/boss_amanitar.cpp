@@ -21,6 +21,8 @@
 #include "ScriptedCreature.h"
 #include "TemporarySummon.h"
 
+namespace Ankahet::Armanitar
+{
 enum Spells
 {
     SPELL_BASH                                    = 57094, // Victim
@@ -177,7 +179,7 @@ public:
             events.Reset();
             events.ScheduleEvent(EVENT_AURA, 1 * IN_MILLISECONDS);
 
-            me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+            me->SetDisplayFromModel(1);
             DoCast(SPELL_PUTRID_MUSHROOM);
 
             if (me->GetEntry() == NPC_POISONOUS_MUSHROOM)
@@ -232,9 +234,12 @@ public:
         return GetAhnKahetAI<npc_amanitar_mushroomsAI>(creature);
     }
 };
+}
 
 void AddSC_boss_amanitar()
 {
+    using namespace Ankahet;
+    using namespace Ankahet::Armanitar;
     new boss_amanitar();
     new npc_amanitar_mushrooms();
 }

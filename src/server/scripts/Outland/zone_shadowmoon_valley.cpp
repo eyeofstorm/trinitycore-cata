@@ -44,11 +44,12 @@ EndContentData */
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptedEscortAI.h"
-#include "ScriptedGossip.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 
+namespace ShadowmoonValley
+{
 /*#####
 # npc_invis_infernal_caster
 #####*/
@@ -1676,9 +1677,11 @@ public:
         return new npc_shadowmoon_tuber_nodeAI(creature);
     }
 };
+}
 
 void AddSC_shadowmoon_valley()
 {
+    using namespace ShadowmoonValley;
     new npc_invis_infernal_caster();
     new npc_infernal_attacker();
     new npc_mature_netherwing_drake();

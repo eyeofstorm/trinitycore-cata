@@ -31,6 +31,8 @@
 #include "TemporarySummon.h"
 #include "trial_of_the_crusader.h"
 
+namespace TrialOfTheCrusader::AnubarakTrial
+{
 enum Yells
 {
     SAY_INTRO               = 0,
@@ -254,10 +256,10 @@ class boss_anubarak_trial : public CreatureScript
                         _burrowGUID.push_back(summoned->GetGUID());
                         summoned->SetReactState(REACT_PASSIVE);
                         summoned->CastSpell(summoned, SPELL_CHURNING_GROUND, false);
-                        summoned->SetDisplayId(summoned->GetCreatureTemplate()->Modelid2);
+                        summoned->SetDisplayFromModel(1);
                         break;
                     case NPC_SPIKE:
-                        summoned->SetDisplayId(summoned->GetCreatureTemplate()->Modelid1);
+                        summoned->SetDisplayFromModel(0);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         {
                             summoned->EngageWithTarget(target);
@@ -621,7 +623,7 @@ class npc_frost_sphere : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(SPELL_FROST_SPHERE);
-                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+                me->SetDisplayFromModel(1);
                 me->GetMotionMaster()->MoveRandom(20.0f);
             }
 
@@ -900,9 +902,12 @@ class spell_anubarak_leeching_swarm : public SpellScriptLoader
             return new spell_anubarak_leeching_swarm_AuraScript();
         }
 };
+}
 
 void AddSC_boss_anubarak_trial()
 {
+    using namespace TrialOfTheCrusader;
+    using namespace TrialOfTheCrusader::AnubarakTrial;
     new boss_anubarak_trial();
     new npc_swarm_scarab();
     new npc_nerubian_burrower();

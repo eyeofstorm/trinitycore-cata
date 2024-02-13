@@ -12,7 +12,7 @@ CollectSourceFiles(
   ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE_SOURCES)
 
-if (WIN32)
+if(WIN32)
   list(APPEND PRIVATE_SOURCES ${sources_windows})
 endif()
 
@@ -41,8 +41,17 @@ set_target_properties(vmap4extractor
       FOLDER
         "tools")
 
-if( UNIX )
+if(UNITY_BUILDS)
+  set_target_properties(vmap4extractor
+      PROPERTIES UNITY_BUILD ON)
+  set_target_properties(vmap4extractor
+      PROPERTIES
+        UNITY_BUILD_MODE BATCH
+        UNITY_BUILD_BATCH_SIZE 8)
+endif()
+
+if(UNIX)
   install(TARGETS vmap4extractor DESTINATION bin)
-elseif( WIN32 )
+elseif(WIN32)
   install(TARGETS vmap4extractor DESTINATION "${CMAKE_INSTALL_PREFIX}")
 endif()

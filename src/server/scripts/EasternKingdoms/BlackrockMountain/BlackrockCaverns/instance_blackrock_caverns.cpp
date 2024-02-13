@@ -19,10 +19,11 @@
 #include "blackrock_caverns.h"
 #include "InstanceScript.h"
 #include "Creature.h"
-#include "InstanceScript.h"
 #include "CreatureAI.h"
 #include "Map.h"
 
+namespace BlackrockCaverns
+{
 ObjectData const creatureData[] =
 {
     { BOSS_ROMOGG_BONECRUSHER,          DATA_ROMOGG_BONECRUSHER         },
@@ -142,8 +143,10 @@ class instance_blackrock_caverns : public InstanceMapScript
             return new instance_blackrock_caverns_InstanceMapScript(map);
         }
 };
+}
 
 void AddSC_instance_blackrock_caverns()
 {
+    using namespace BlackrockCaverns;
     new instance_blackrock_caverns();
 }

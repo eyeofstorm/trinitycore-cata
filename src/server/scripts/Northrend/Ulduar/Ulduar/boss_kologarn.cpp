@@ -34,6 +34,8 @@ SDComment: @todo Achievements
 SDCategory: Ulduar
 EndScriptData */
 
+namespace Ulduar::Kologarn
+{
 enum Spells
 {
     SPELL_ARM_DEAD_DAMAGE               = 63629,
@@ -200,7 +202,7 @@ class boss_kologarn : public CreatureScript
                     if (!right && !left)
                         events.ScheduleEvent(EVENT_STONE_SHOUT, 5000);
 
-                    instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, CRITERIA_DISARMED);
+                    instance->TriggerGameEvent(CRITERIA_DISARMED);
                 }
                 else
                 {
@@ -646,9 +648,12 @@ class spell_kologarn_summon_focused_eyebeam : public SpellScriptLoader
             return new spell_kologarn_summon_focused_eyebeam_SpellScript();
         }
 };
+}
 
 void AddSC_boss_kologarn()
 {
+    using namespace Ulduar;
+    using namespace Ulduar::Kologarn;
     new boss_kologarn();
     new spell_ulduar_rubble_summon();
     new spell_ulduar_squeezed_lifeless();

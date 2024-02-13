@@ -27,6 +27,8 @@
 #include "TemporarySummon.h"
 #include "utgarde_pinnacle.h"
 
+namespace UtgardePinnacle::Skadi
+{
 enum Spells
 {
     // Skadi Spells
@@ -169,8 +171,6 @@ public:
             me->SetReactState(REACT_PASSIVE);
             if (!instance->GetCreature(DATA_GRAUF))
                 me->SummonCreature(NPC_GRAUF, GraufLoc);
-
-            instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_LODI_DODI_WE_LOVES_THE_SKADI);
         }
 
         void EnterEvadeMode(EvadeReason /*why*/) override
@@ -234,7 +234,7 @@ public:
                     SpawnFirstWave();
                     Talk(SAY_AGGRO);
                     _phase = PHASE_FLYING;
-                    instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_LODI_DODI_WE_LOVES_THE_SKADI);
+                    instance->TriggerGameEvent(ACHIEV_LODI_DODI_WE_LOVES_THE_SKADI);
 
                     scheduler
                         .Schedule(Seconds(6), [this](TaskContext resetCheck)
@@ -932,9 +932,12 @@ class at_skadi_gaunlet : public AreaTriggerScript
             return true;
         }
 };
+}
 
 void AddSC_boss_skadi()
 {
+    using namespace UtgardePinnacle;
+    using namespace UtgardePinnacle::Skadi;
     new boss_skadi();
     new npc_grauf();
     new npc_ymirjar_warrior();

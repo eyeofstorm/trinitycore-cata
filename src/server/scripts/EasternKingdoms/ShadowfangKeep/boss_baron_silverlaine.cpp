@@ -20,13 +20,14 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Spell.h"
+#include "SpellScript.h"
 #include "SpellAuras.h"
-#include "SpellAuraEffects.h"
 #include "Player.h"
 #include "InstanceScript.h"
-#include "CreatureAIImpl.h"
 #include "ObjectAccessor.h"
 
+namespace ShadowfangKeep::BaronSilverlaine
+{
 enum Texts
 {
     SAY_AGGRO = 0,
@@ -395,9 +396,12 @@ class spell_sfk_summon_worgen_spirit : public SpellScript
         OnEffectHitTarget.Register(&spell_sfk_summon_worgen_spirit::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
     }
 };
+}
 
 void AddSC_boss_baron_silverlaine()
 {
+    using namespace ShadowfangKeep;
+    using namespace ShadowfangKeep::BaronSilverlaine;
     RegisterShadowfangKeepCreatureAI(boss_baron_silverlaine);
     RegisterShadowfangKeepCreatureAI(npc_sfk_worgen_spirit);
     RegisterSpellScript(spell_sfk_summon_worgen_spirit);

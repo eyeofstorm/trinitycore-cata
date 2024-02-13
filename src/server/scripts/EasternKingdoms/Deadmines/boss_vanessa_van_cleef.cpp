@@ -20,17 +20,15 @@
 #include "InstanceScript.h"
 #include "GridNotifiers.h"
 #include "MotionMaster.h"
-#include "MovementTypedefs.h"
 #include "MoveSplineInit.h"
-#include "PassiveAI.h"
 #include "PhasingHandler.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
-#include "SpellAuraEffects.h"
 #include "ObjectAccessor.h"
-#include "MotionMaster.h"
 #include "SpellScript.h"
 
+namespace Deadmines::VanessaVanCleef
+{
 enum Texts
 {
     // Vanessa VanCleef
@@ -735,9 +733,12 @@ class spell_vanessa_backslash_targeting : public SpellScriptLoader
             return new spell_vanessa_backslash_targeting_SpellScript();
         }
 };
+}
 
 void AddSC_boss_vanessa_van_cleef()
 {
+    using namespace Deadmines;
+    using namespace Deadmines::VanessaVanCleef;
     new boss_vanessa_van_cleef();
     new npc_vanessa_vanessa_van_cleef();
     new npc_vanessa_note_from_vanessa();
