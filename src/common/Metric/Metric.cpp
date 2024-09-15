@@ -298,3 +298,6 @@ template TC_COMMON_API std::string Metric::FormatInfluxDBValue(int32);
 template TC_COMMON_API std::string Metric::FormatInfluxDBValue(uint32);
 template TC_COMMON_API std::string Metric::FormatInfluxDBValue(int64);
 template TC_COMMON_API std::string Metric::FormatInfluxDBValue(uint64);
+
+template TC_COMMON_API std::string Metric::FormatInfluxDBValue(long);
+template TC_COMMON_API std::string Metric::FormatInfluxDBValue(unsigned long);

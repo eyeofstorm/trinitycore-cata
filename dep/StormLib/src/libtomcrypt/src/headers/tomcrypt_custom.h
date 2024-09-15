@@ -417,7 +417,20 @@
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+void * LibTomMalloc(size_t n);
+void * LibTomCalloc(size_t n, size_t s);
+void * LibTomRealloc(void *p, size_t n);
+void LibTomFree(void * p);
+clock_t LibTomClock(void);
+void LibTomQsort(void *base, size_t nmemb, size_t size, int(*compar)(const void *, const void *));
+
+#ifdef __cplusplus
+}
+#endif
 
 /* $Source: /cvs/libtom/libtomcrypt/src/headers/tomcrypt_custom.h,v $ */
 /* $Revision: 1.73 $ */

@@ -1,5 +1,6 @@
 #include "mpqfile.h"
 #include <cstdio>
+#include <string>
 #include "StormLib.h"
 
 MPQFile::MPQFile(HANDLE mpq, char const* filename, bool warnNoExist /*= true*/) :
